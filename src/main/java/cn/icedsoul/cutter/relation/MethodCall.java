@@ -4,9 +4,7 @@ import cn.icedsoul.cutter.domain.Method;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.neo4j.ogm.annotation.*;
 
 /**
  * @author IcedSoul
@@ -17,6 +15,10 @@ import org.neo4j.ogm.annotation.StartNode;
 @NoArgsConstructor
 @RelationshipEntity(type = "METHOD_CALL")
 public class MethodCall extends BaseRelation{
+    @Id
+    @GeneratedValue
+    private Long id;
+
     private long startTime;
     private long endTime;
 
