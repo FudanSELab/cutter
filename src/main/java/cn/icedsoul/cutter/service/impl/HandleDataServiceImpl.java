@@ -98,14 +98,15 @@ public class HandleDataServiceImpl implements HandleDataService {
     }
 
     private Method handleMethod(String methodInfo) {
+        methodInfo = methodInfo.substring(0, methodInfo.indexOf(")") + 1);
         String[] methods = methodInfo.split(" ");
         List<String> modifier = new ArrayList<>();
         Collections.addAll(modifier, Arrays.copyOfRange(methods, 0, methods.length - 2));
         List<String> params = new ArrayList<>();
         String returnType = methods[methods.length - 2];
         String methodNameAndParams = methods[methods.length - 1];
-        String methodName = methodNameAndParams.substring(0, methodNameAndParams.indexOf('(') + 1);
-        Collections.addAll(params, methodNameAndParams.substring(methodNameAndParams.indexOf('(') + 1, methodNameAndParams.indexOf(')') + 1).split(","));
+        String methodName = methodNameAndParams.substring(0, methodNameAndParams.indexOf('('));
+        Collections.addAll(params, methodNameAndParams.substring(methodNameAndParams.indexOf('(') + 1, methodNameAndParams.indexOf(')')).split(","));
         Method method = methodRepository.findByModifierAndReturnTypeAndMethodNameAndParams(modifier, returnType, methodName, params);
         if(isNull(method)) {
             Method newMethod = new Method(modifier, returnType, methodName, params);
