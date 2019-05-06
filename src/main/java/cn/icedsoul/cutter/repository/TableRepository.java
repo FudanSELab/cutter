@@ -8,4 +8,5 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
  * @date 19-5-6 上午10:27
  */
 public interface TableRepository extends Neo4jRepository<Table, Long> {
+    Table findByDatabaseNameAndAndTableName(String databaseName, String tableName);
 }

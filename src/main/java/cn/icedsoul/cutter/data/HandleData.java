@@ -18,7 +18,7 @@ import static cn.icedsoul.cutter.util.Common.isNull;
 @Component
 public class HandleData implements ApplicationRunner {
 
-    @Value("cutter.dat-file")
+    @Value("${cutter.dat-file}")
     private String file;
 
     @Autowired

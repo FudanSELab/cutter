@@ -8,6 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -27,4 +28,10 @@ public class Table {
 
     @Relationship(type = "CONTAIN", direction = Relationship.INCOMING)
     private Set<Sql> sql;
+
+    public Table(String databaseName, String tableName){
+        this.databaseName = databaseName;
+        this.tableName = tableName;
+        this.sql = new HashSet<>();
+    }
 }
