@@ -27,4 +27,10 @@ public class MethodCall extends BaseRelation{
 
     @EndNode
     private Method calledMethod;
+
+    public MethodCall(BaseRelation baseRelation){
+        super(baseRelation.getTraceId(), baseRelation.getSessionId(),
+                baseRelation.getScenarioId(), baseRelation.getScenarioName(),
+                baseRelation.getLevel(), baseRelation.getOrder());
+    }
 }

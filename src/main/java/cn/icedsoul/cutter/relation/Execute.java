@@ -27,4 +27,10 @@ public class Execute extends BaseRelation {
 
     @EndNode
     private Sql sql;
+
+    public Execute(BaseRelation baseRelation){
+        super(baseRelation.getTraceId(), baseRelation.getSessionId(),
+                baseRelation.getScenarioId(), baseRelation.getScenarioName(),
+                baseRelation.getLevel(), baseRelation.getOrder());
+    }
 }

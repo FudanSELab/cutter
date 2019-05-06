@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+public
 class BaseRelation {
     private Long traceId;
     private String sessionId;

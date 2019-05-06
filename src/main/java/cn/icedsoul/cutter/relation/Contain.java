@@ -25,4 +25,10 @@ public class Contain extends BaseRelation {
 
     @EndNode
     private Table table;
+
+    public Contain(BaseRelation baseRelation){
+        super(baseRelation.getTraceId(), baseRelation.getSessionId(),
+                baseRelation.getScenarioId(), baseRelation.getScenarioName(),
+                baseRelation.getLevel(), baseRelation.getOrder());
+    }
 }
