@@ -6,4 +6,4 @@ spring:
       uri: bolt://10.141.212.138:7687
 
 cutter:
-  dat-file: /code/micoservice/jeesite/trace-data/kieker-20190506-105539-32376454067445-UTC--KIEKER-SINGLETON/kieker-20190506-105539637-UTC-001.dat
+  dat-file:

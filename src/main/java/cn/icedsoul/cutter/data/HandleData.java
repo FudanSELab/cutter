@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import static cn.icedsoul.cutter.util.Common.isNull;
+import static cn.icedsoul.cutter.util.Common.isNullString;
 
 /**
  * @author IcedSoul
@@ -26,7 +27,7 @@ public class HandleData implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        if(!isNull(file)){
+        if(!isNullString(file)){
             handleDataService.handleData(file);
         }
         else {
