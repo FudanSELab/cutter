@@ -13,10 +13,13 @@ import java.util.List;
  */
 @Repository
 public interface MethodRepository extends Neo4jRepository<Method, Long> {
+
     /**
-     * 查询指定内容的方法
+     * 查询特定方法是否存在
      * @param modifier
      * @param returnType
+     * @param packageName
+     * @param className
      * @param methodName
      * @param params
      * @return
