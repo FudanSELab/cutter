@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.repository;
 
 import cn.icedsoul.cutter.domain.Method;
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.util.List;
@@ -26,4 +27,12 @@ public interface MethodRepository extends Neo4jRepository<Method, Long> {
      * @return
      */
     Method findByMethodName(String methodName);
+
+    /**
+     * 寻找源点
+     */
+    @Query("match (a:Method)" +
+            "where a.methodName=’Entry'" +
+            "return a")
+    List<Method> findEntry();
 }

@@ -3,7 +3,8 @@ spring:
     neo4j:
       username: neo4j
       password: 123456
-      uri: bolt://10.141.212.138:7687
+#      uri: bolt://10.141.211.163:7687
+      uri: bolt://10.141.211.176:7687
 
 cutter:
   dat-file:
