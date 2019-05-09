@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.domain;
 
 import cn.icedsoul.cutter.relation.MethodCall;
+import cn.icedsoul.cutter.relation.MethodContain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,10 @@ public class Method {
     @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
     private Set<MethodCall> callMethods;
 
+    @JsonIgnoreProperties("class")
+    @Relationship(type = "METHOD_CONTAIN", direction = Relationship.INCOMING)
+    private Set<MethodContain> methodContains;
+
     @Relationship(type = "METHOD_CALL")
     private Set<Method> methods;
 
@@ -50,6 +55,7 @@ public class Method {
         this.methodName = methodName;
         this.params = params;
         this.callMethods = new HashSet<>();
+        this.methodContains = new HashSet<>();
         this.methods = new HashSet<>();
         this.sql = new HashSet<>();
     }

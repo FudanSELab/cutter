@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.relation;
 
-import cn.icedsoul.cutter.domain.Package;
+import cn.icedsoul.cutter.domain.Class;
+import cn.icedsoul.cutter.domain.Method;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,26 +10,26 @@ import org.neo4j.ogm.annotation.*;
 
 /**
  * @author IcedSoul
- * @date 19-5-9 下午3:57
+ * @date 19-5-9 下午4:27
  */
-@EqualsAndHashCode(exclude = {"parentPackage","aPackage"})
+@EqualsAndHashCode(exclude = {"parentClass","method"})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RelationshipEntity(type = "PACKAGE_CONTAIN")
-public class PackageContain {
+@RelationshipEntity(type = "METHOD_CONTAIN")
+public class MethodContain {
     @Id
     @GeneratedValue
     private Long id;
 
     @StartNode
-    private Package parentPackage;
+    private Class parentClass;
 
     @EndNode
-    private Package aPackage;
+    private Method method;
 
     @Override
     public String toString(){
-        return aPackage.getPackageName();
+        return method.getMethodName();
     }
 }

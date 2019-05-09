@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.util;
 
 import cn.icedsoul.cutter.domain.Method;
+import cn.icedsoul.cutter.domain.Package;
 import cn.icedsoul.cutter.domain.Sql;
 
 import java.text.SimpleDateFormat;
@@ -14,6 +15,8 @@ public class Common {
 
     public static Method ENTRY = null;
     public static Sql TMP_SQL = null;
+    public static Package ROOT = null;
+
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static boolean isNull(Object o){
