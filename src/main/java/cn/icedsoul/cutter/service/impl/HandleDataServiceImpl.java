@@ -1,18 +1,18 @@
 package cn.icedsoul.cutter.service.impl;
 
+import cn.icedsoul.cutter.domain.Class;
 import cn.icedsoul.cutter.domain.Method;
+import cn.icedsoul.cutter.domain.Package;
 import cn.icedsoul.cutter.domain.Sql;
 import cn.icedsoul.cutter.domain.Table;
-import cn.icedsoul.cutter.relation.BaseRelation;
-import cn.icedsoul.cutter.relation.Contain;
-import cn.icedsoul.cutter.relation.Execute;
-import cn.icedsoul.cutter.relation.MethodCall;
+import cn.icedsoul.cutter.relation.*;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.HandleDataService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -31,8 +31,8 @@ import static cn.icedsoul.cutter.util.Common.*;
 @Service
 public class HandleDataServiceImpl implements HandleDataService {
 
-    @Autowired
-    MethodRepository methodRepository;
+    @Resource
+    private MethodRepository methodRepository;
 
     @Autowired
     SqlRepository sqlRepository;
@@ -49,8 +49,23 @@ public class HandleDataServiceImpl implements HandleDataService {
     @Autowired
     ContainRepository containRepository;
 
-    private List<BaseRelation> relations = new ArrayList<>();
+    @Autowired
+    PackageRepository packageRepository;
 
+    @Autowired
+    PackageContainRepository packageContainRepository;
+
+    @Autowired
+    ClassRepository classRepository;
+
+    @Autowired
+    ClassContainRepository classContainRepository;
+
+    @Autowired
+    MethodContainRepository methodContainRepository;
+
+
+    private List<BaseRelation> relations = new ArrayList<>();
 
     @Override
     public void handleData(String fileName) {
@@ -127,16 +142,19 @@ public class HandleDataServiceImpl implements HandleDataService {
                 ENTRY.setMethodName("Entry");
                 ENTRY = methodRepository.save(ENTRY);
             }
-            TMP_SQL = sqlRepository.findByDatabaseNameAndAndSql("TEMP", "TEMP");
+            TMP_SQL = sqlRepository.findByDatabaseNameAndAndSql("Temp", "Temp");
             if(isNull(TMP_SQL)){
-                TMP_SQL = new Sql();
-                TMP_SQL.setDatabaseName("TEMP");
-                TMP_SQL.setSql("TEMP");
+                TMP_SQL = new Sql("Temp", "Temp");
                 TMP_SQL = sqlRepository.save(TMP_SQL);
+            }
+            ROOT = packageRepository.findByPackageName("Root");
+            if(isNull(ROOT)){
+                ROOT = new Package("Root");
+                ROOT = packageRepository.save(ROOT);
             }
             return;
         }
-        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11], Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
+        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11], Double.valueOf(lines[12]), Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
         if(NODE_TYPE_CLASS_FUNCTION.equals(lines[7])) {
             Method method = handleMethod(lines[2]);
             handleMethodCall(method, Long.valueOf(lines[5]), Long.valueOf(lines[6]), baseRelation);
@@ -171,7 +189,9 @@ public class HandleDataServiceImpl implements HandleDataService {
                 findByModifierAndReturnTypeAndPackageNameAndClassNameAndMethodNameAndParams(modifier, returnType, packageName, className, methodName, params);
         if(isNull(method)) {
             Method newMethod = new Method(modifier, returnType, packageName, className, methodName, params);
-            return methodRepository.save(newMethod);
+            Method returnMethod = methodRepository.save(newMethod);
+            buildIndex(returnMethod);
+            return returnMethod;
         }
         return method;
     }
@@ -192,7 +212,6 @@ public class HandleDataServiceImpl implements HandleDataService {
         methodCall.setEndTime(endTime);
         methodCall.setCalledMethod(method);
         methodCall.setMethod(ENTRY);
-//        methodCallRepository.save(methodCall);
         relations.add(methodCall);
         log.info("[NOTICE]: I'm handling MethodCall.");
     }
@@ -208,7 +227,6 @@ public class HandleDataServiceImpl implements HandleDataService {
         execute.setMethod(ENTRY);
         execute.setSql(sql);
         execute.setExecuteTime(executeTime);
-//        executeRepository.save(execute);
         relations.add(execute);
         log.info("[NOTICE]: I'm handling Execute.");
     }
@@ -223,18 +241,18 @@ public class HandleDataServiceImpl implements HandleDataService {
         Contain contain = new Contain(baseRelation);
         contain.setSql(TMP_SQL);
         contain.setTable(table);
-//        containRepository.save(contain);
         relations.add(contain);
         log.info("[NOTICE]: I'm handling Table.");
     }
 
     private void clearDatabase() {
-        methodRepository.deleteAll();
-        sqlRepository.deleteAll();
-        tableRepository.deleteAll();
-        containRepository.deleteAll();
-        executeRepository.deleteAll();
-        methodCallRepository.deleteAll();
+        methodRepository.clearDatabase();
+//        methodRepository.deleteAll();
+//        sqlRepository.deleteAll();
+//        tableRepository.deleteAll();
+//        containRepository.deleteAll();
+//        executeRepository.deleteAll();
+//        methodCallRepository.deleteAll();
         log.info("[NOTICE]: Clear all data.");
     }
 
@@ -283,7 +301,6 @@ public class HandleDataServiceImpl implements HandleDataService {
 
 
     private void changeParent(BaseRelation parent, BaseRelation child){
-//        log.info("[NOTICE]: Start update parent:" + getTime());
         if(child instanceof MethodCall){
             MethodCall childMethodCall = (MethodCall) child;
             MethodCall parentMethodCall = (MethodCall) parent;
@@ -302,6 +319,35 @@ public class HandleDataServiceImpl implements HandleDataService {
             childContain.setSql(parentExecute.getSql());
             containRepository.save(childContain);
         }
-//        log.info("[NOTICE]: End update parent:" + getTime());
+    }
+
+    private void buildIndex(Method method) {
+        String[] packageNames = method.getPackageName().split("\\.");
+        Package lastPackage = ROOT;
+        for (String packageName : packageNames) {
+            Package aPackage = packageRepository.findByPackageName(packageName);
+            if (isNull(aPackage)) {
+                aPackage = new Package(packageName);
+                aPackage = packageRepository.save(aPackage);
+                PackageContain packageContain = new PackageContain();
+                packageContain.setParentPackage(lastPackage);
+                packageContain.setAPackage(aPackage);
+                packageContainRepository.save(packageContain);
+            }
+            lastPackage = aPackage;
+        }
+        Class clazz = classRepository.findByClassName(method.getClassName());
+        if (isNull(clazz)){
+            clazz = new Class(method.getClassName());
+            clazz = classRepository.save(clazz);
+            ClassContain classContain = new ClassContain();
+            classContain.setParentPackage(lastPackage);
+            classContain.setAClass(clazz);
+            classContainRepository.save(classContain);
+        }
+        MethodContain methodContain = new MethodContain();
+        methodContain.setParentClass(clazz);
+        methodContain.setMethod(method);
+        methodContainRepository.save(methodContain);
     }
 }
