@@ -37,4 +37,12 @@ public interface MethodRepository extends Neo4jRepository<Method, Long> {
 
     @Query("match (n)-[r]-() delete n,r")
     void clearDatabase();
+
+    /**
+     * 寻找源点
+     */
+    @Query("match (a:Method)" +
+            "where a.methodName='Entry'" +
+            "return a")
+    List<Method> findEntry();
 }
