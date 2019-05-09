@@ -9,21 +9,16 @@ import java.util.List;
 
 public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
 
-    @Query("match (t1:Table)-[r:CLOSETO]-(t2:Table)" +
-            "where t1.databaseName={0} and t1.tableName={1}" +
-            "and t2.databaseName={2} and t2.tableName={3}" +
-            "return r.weight")
+//    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName={2}})" +
+//            "where t1.databaseName={0} and t1.tableName={1}" +
+//            "and t2.databaseName={2} and t2.tableName={3}" +
+//            "return r.weight")
+    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName:{2}, tableName:{3}})" +
+        "return r.weight")
     List<Double> findCloseToByStartTableAndEndTable(String startDatabaseName, String startTableName,
                                                      String endDatabaseName, String endTableName);
 
-//    @Query("start t1=node({0}), t2=node({1})" +
-//            "match (t1)-[r:CLOSETO]->(t2)" +
-//            "return r")
-//    List<CloseTo> findCloseToByStartTableAndEndTable(Table startTable, Table endTable);
-
-    @Query("match (t1:Table)-[r:CLOSETO]-(t2:Table)" +
-            "where t1.databaseName={0} and t1.tableName={1}" +
-            "and t2.databaseName={2} and t2.tableName={3}" +
+    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName:{2}, tableName:{3}})" +
             "set r.weight = {4}" +
             "return r.weight")
     double setWeight(String startDabaseName, String startTableName,

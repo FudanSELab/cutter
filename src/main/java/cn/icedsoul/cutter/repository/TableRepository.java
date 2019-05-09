@@ -16,19 +16,16 @@ import java.util.List;
 public interface TableRepository extends Neo4jRepository<Table, Long> {
     Table findByDatabaseNameAndAndTableName(String databaseName, String tableName);
 
-    @Query("match (s:Sql)-[:CONTAIN]->(t:Table)" +
-            "where s.databaseName={0} and s.sql={1}" +
+    @Query("match (s:Sql{databaseName:{0},sql:{1}})-[:CONTAIN]->(t:Table)" +
             "return t")
     List<Table> findTablesBySql(String databaseName, String sql);
 
 
-    @Query("match (:Sql)-[c:CONTAIN]->(t:Table)" +
-            "where c.traceId={0} " +
+    @Query("match (:Sql)-[c:CONTAIN{traceId:{0}}]->(t:Table)" +
             "return distinct t" )
     List<Table> findTablesOfSameTrace(long traceId);
 
-    @Query("match (:Sql)-[c:CONTAIN]->(t:Table)" +
-            "where c.scenarioId={0} " +
+    @Query("match (:Sql)-[c:CONTAIN{scenarioId:{0}}]->(t:Table)" +
             "return distinct t" )
     List<Table> findTablesOfSameScenario(String scenarioId);
 

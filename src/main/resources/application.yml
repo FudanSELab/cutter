@@ -9,4 +9,5 @@ spring:
 
 
 cutter:
-  dat-file: /code/micoservice/jeesite/trace-data/kieker-20190508-121406-30280777834712-UTC--KIEKER-SINGLETON/kieker-20190508-121406574-UTC-001.dat
+  dat-file:
+#  dat-file: /code/micoservice/jeesite/trace-data/kieker-20190508-121406-30280777834712-UTC--KIEKER-SINGLETON/kieker-20190508-121406574-UTC-001.dat

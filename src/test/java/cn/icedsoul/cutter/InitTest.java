@@ -45,6 +45,7 @@ public class InitTest {
         methodCallRepository.deleteAll();
 
         Method m0 = new Method();//源点
+        m0.setMethodName("Entry");
 
         Method m1 = new Method();
         m1.setModifier(Arrays.asList(new String[]{"public"}));
