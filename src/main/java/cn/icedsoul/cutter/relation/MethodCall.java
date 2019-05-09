@@ -3,6 +3,7 @@ package cn.icedsoul.cutter.relation;
 import cn.icedsoul.cutter.domain.Method;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.*;
 
@@ -10,6 +11,7 @@ import org.neo4j.ogm.annotation.*;
  * @author IcedSoul
  * @date 19-5-5 下午4:25
  */
+@EqualsAndHashCode(exclude = {"method","calledMethod"},callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,5 +34,10 @@ public class MethodCall extends BaseRelation{
         super(baseRelation.getTraceId(), baseRelation.getSessionId(),
                 baseRelation.getScenarioId(), baseRelation.getScenarioName(),
                 baseRelation.getLevel(), baseRelation.getOrder());
+    }
+
+    @Override
+    public String toString(){
+        return calledMethod.getMethodName();
     }
 }

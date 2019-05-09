@@ -8,7 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import static cn.icedsoul.cutter.util.Common.isNull;
 import static cn.icedsoul.cutter.util.Common.isNullString;
 
 /**
@@ -29,6 +28,7 @@ public class HandleData implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         if(!isNullString(file)){
             handleDataService.handleData(file);
+            log.info("[NOTICE]: Handle Data Finished!");
         }
         else {
             log.info("Please define the file path!");

@@ -1,5 +1,8 @@
 package cn.icedsoul.cutter.domain;
 
+import cn.icedsoul.cutter.relation.Contain;
+import cn.icedsoul.cutter.relation.Execute;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,8 +29,9 @@ public class Sql {
     private String databaseName;
     private String sql;
 
+    @JsonIgnoreProperties("sql")
     @Relationship(type = "EXECUTE", direction = Relationship.INCOMING)
-    private Set<Method> callMethods;
+    private Set<Execute> executes;
 
     @Relationship(type = "CONTAIN")
     private Set<Table> tables;
@@ -35,7 +39,7 @@ public class Sql {
     public Sql(String databaseName, String sql){
         this.databaseName = databaseName;
         this.sql = sql;
-        this.callMethods = new HashSet<>();
+        this.executes = new HashSet<>();
         this.tables = new HashSet<>();
     }
 }

@@ -1,7 +1,7 @@
 package cn.icedsoul.cutter.domain;
 
-import cn.icedsoul.cutter.util.Common;
-import lombok.AllArgsConstructor;
+import cn.icedsoul.cutter.relation.MethodCall;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.GeneratedValue;
@@ -27,36 +27,30 @@ public class Method {
     private Long id;
     private List<String> modifier;
     private String returnType;
+    private String packageName;
+    private String className;
     private String methodName;
     private List<String> params;
 
+    @JsonIgnoreProperties("method")
     @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
-    private Set<Method> callMethods;
+    private Set<MethodCall> callMethods;
 
     @Relationship(type = "METHOD_CALL")
-    private Set<Method> calledMethods;
+    private Set<Method> methods;
 
     @Relationship(type = "EXECUTE")
     private Set<Sql> sql;
 
-    public Method(List<String> modifier, String returnType, String methodName, List<String> params){
+    public Method(List<String> modifier, String returnType,  String packageName,  String className,String methodName, List<String> params){
         this.modifier = modifier;
         this.returnType = returnType;
+        this.packageName = packageName;
+        this.className = className;
         this.methodName = methodName;
         this.params = params;
         this.callMethods = new HashSet<>();
-        this.calledMethods = new HashSet<>();
+        this.methods = new HashSet<>();
         this.sql = new HashSet<>();
     }
-
-//    public void addMethodCall(Method callMethod, Method calledMethod){
-//        if(Common.isNull(this.callMethods)){
-//            this.callMethods = new HashSet<>();
-//        }
-//        if(Common.isNull(this.calledMethods)){
-//            this.calledMethods = new HashSet<>();
-//        }
-//        this.callMethods.ad
-//
-//    }
 }

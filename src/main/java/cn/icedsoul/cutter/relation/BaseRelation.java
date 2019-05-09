@@ -11,12 +11,19 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public
-class BaseRelation {
+public class BaseRelation implements Comparable<BaseRelation> {
     private Long traceId;
     private String sessionId;
     private String scenarioId;
     private String scenarioName;
     private Integer level;
     private Integer order;
+
+    @Override
+    public int compareTo(BaseRelation o) {
+        if(this.level.compareTo(o.level) == 0){
+            return this.order.compareTo(o.order);
+        }
+        return this.level.compareTo(o.level);
+    }
 }

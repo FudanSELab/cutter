@@ -1,5 +1,7 @@
 package cn.icedsoul.cutter.domain;
 
+import cn.icedsoul.cutter.relation.Contain;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,12 +28,13 @@ public class Table {
     private String databaseName;
     private String tableName;
 
+    @JsonIgnoreProperties("table")
     @Relationship(type = "CONTAIN", direction = Relationship.INCOMING)
-    private Set<Sql> sql;
+    private Set<Contain> contains;
 
     public Table(String databaseName, String tableName){
         this.databaseName = databaseName;
         this.tableName = tableName;
-        this.sql = new HashSet<>();
+        this.contains = new HashSet<>();
     }
 }

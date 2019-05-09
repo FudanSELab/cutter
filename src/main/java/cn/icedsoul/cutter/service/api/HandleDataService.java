@@ -6,8 +6,13 @@ package cn.icedsoul.cutter.service.api;
  */
 public interface HandleDataService {
     /**
-     * 处理输入文件
+     * 处理输入文件,将信息输入至数据库
      * @param file
      */
     void handleData(String file);
+
+//    /**
+//     * 将数据库信息构建成调用树
+//     */
+//    void buildTree();
 }

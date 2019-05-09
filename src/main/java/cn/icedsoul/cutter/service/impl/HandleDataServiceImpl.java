@@ -17,10 +17,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.icedsoul.cutter.util.CONSTANT.*;
 import static cn.icedsoul.cutter.util.Common.*;
@@ -51,9 +49,12 @@ public class HandleDataServiceImpl implements HandleDataService {
     @Autowired
     ContainRepository containRepository;
 
+    private List<BaseRelation> relations = new ArrayList<>();
+
 
     @Override
     public void handleData(String fileName) {
+        clearDatabase();
         File file = new File(fileName);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -63,6 +64,52 @@ public class HandleDataServiceImpl implements HandleDataService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        buildTree();
+    }
+
+    public void buildTree() {
+        Map<Long, List<BaseRelation>> trace = getLocalRelations();
+        for(Long traceId : trace.keySet()){
+            log.info("[NOTICE]: This TraceId is " + traceId);
+            List<BaseRelation> relations = trace.get(traceId);
+            Map<Integer, List<BaseRelation>> levelRelation = relations.stream().collect(Collectors.groupingBy(BaseRelation::getLevel));
+            List<Integer> levels = new ArrayList<>(levelRelation.keySet());
+            Collections.sort(levels);
+            List<BaseRelation> lastRelations =  levelRelation.get(0);
+            methodCallRepository.save((MethodCall)lastRelations.get(0));
+            for(int i = 1; i < levels.size(); i++){
+                List<BaseRelation> relationList = levelRelation.get(i);
+                Collections.sort(relationList);
+                for(BaseRelation relation: relationList){
+                    int mark = 0;
+                    while(mark + 1 < lastRelations.size() && relation.getOrder() > lastRelations.get(mark + 1).getOrder()){
+                       mark++;
+                    }
+                    changeParent(lastRelations.get(mark), relation);
+                }
+                lastRelations = relationList;
+            }
+//            methodCallRepository.save((MethodCall) relations.get(0));
+//            int lastMark = 0, level = 1, mark = 1;
+//            while(mark < relations.size()){
+//                int tLevel = mark;
+//                while(mark < relations.size()){
+//                    BaseRelation relation = relations.get(mark);
+//                    if(relation.getLevel() > level){
+//                        level++;
+//                        break;
+//                    }
+//                    while(lastMark + 1 < tLevel && relation.getOrder() > relations.get(lastMark + 1).getOrder()){
+//                        lastMark++;
+//                    }
+//                    changeParent(relations.get(lastMark), relation);
+//                    mark++;
+//                }
+//                lastMark = tLevel;
+//
+//            }
+        }
+
     }
 
     private void handleSingleLine(String line){
@@ -72,11 +119,20 @@ public class HandleDataServiceImpl implements HandleDataService {
         }
         String[] lines = line.split(";");
         if(DAT_START.equals(lines[0])){
-            Method method = methodRepository.findByMethodName("Entry");
-            if(method == null) {
-                method = new Method();
-                method.setMethodName("Entry");
-                methodRepository.save(method);
+            ENTRY = methodRepository.findByPackageNameAndClassNameAndMethodName("", "", "Entry");
+            if(isNull(ENTRY)) {
+                ENTRY = new Method();
+                ENTRY.setPackageName("");
+                ENTRY.setClassName("");
+                ENTRY.setMethodName("Entry");
+                ENTRY = methodRepository.save(ENTRY);
+            }
+            TMP_SQL = sqlRepository.findByDatabaseNameAndAndSql("TEMP", "TEMP");
+            if(isNull(TMP_SQL)){
+                TMP_SQL = new Sql();
+                TMP_SQL.setDatabaseName("TEMP");
+                TMP_SQL.setSql("TEMP");
+                TMP_SQL = sqlRepository.save(TMP_SQL);
             }
             return;
         }
@@ -105,23 +161,40 @@ public class HandleDataServiceImpl implements HandleDataService {
         List<String> params = new ArrayList<>();
         String returnType = methods[methods.length - 2];
         String methodNameAndParams = methods[methods.length - 1];
-        String methodName = methodNameAndParams.substring(0, methodNameAndParams.indexOf('('));
+        String methodNameAll = methodNameAndParams.substring(0, methodNameAndParams.indexOf('('));
+        String methodName = methodNameAll.substring(methodNameAll.lastIndexOf('.') + 1);
+        String packageAndClassName = methodNameAll.substring(0, methodNameAll.lastIndexOf("."));
+        String packageName = packageAndClassName.substring(0, packageAndClassName.lastIndexOf("."));
+        String className = packageAndClassName.substring(packageAndClassName.lastIndexOf(".") + 1);
         Collections.addAll(params, methodNameAndParams.substring(methodNameAndParams.indexOf('(') + 1, methodNameAndParams.indexOf(')')).split(","));
-        Method method = methodRepository.findByModifierAndReturnTypeAndMethodNameAndParams(modifier, returnType, methodName, params);
+        Method method = methodRepository.
+                findByModifierAndReturnTypeAndPackageNameAndClassNameAndMethodNameAndParams(modifier, returnType, packageName, className, methodName, params);
         if(isNull(method)) {
-            Method newMethod = new Method(modifier, returnType, methodName, params);
+            Method newMethod = new Method(modifier, returnType, packageName, className, methodName, params);
             return methodRepository.save(newMethod);
         }
         return method;
     }
 
+    /**
+     * 处理方法调用关系时按照以下逻辑：
+     *  1. 若为当前trace第一条记录，则父节点为Entry，直接插入
+     *  2. 若当前trace已经有记录，则寻找到正确的位置进行插入，插入结点后调整树结构，使其保持正常
+     *
+     * @param method
+     * @param startTime
+     * @param endTime
+     * @param baseRelation
+     */
     private void handleMethodCall(Method method, Long startTime, Long endTime, BaseRelation baseRelation){
         MethodCall methodCall = new MethodCall(baseRelation);
         methodCall.setStartTime(startTime);
         methodCall.setEndTime(endTime);
-        methodCall.setMethod(methodRepository.findByMethodName("Entry"));
         methodCall.setCalledMethod(method);
-        methodCallRepository.save(methodCall);
+        methodCall.setMethod(ENTRY);
+//        methodCallRepository.save(methodCall);
+        relations.add(methodCall);
+        log.info("[NOTICE]: I'm handling MethodCall.");
     }
 
     private void handleExecuteSql(Long executeTime, String dbAndsql, BaseRelation baseRelation){
@@ -132,10 +205,12 @@ public class HandleDataServiceImpl implements HandleDataService {
             sql = sqlRepository.save(sql);
         }
         Execute execute = new Execute(baseRelation);
-        execute.setMethod(methodRepository.findByMethodName("Entry"));
+        execute.setMethod(ENTRY);
         execute.setSql(sql);
         execute.setExecuteTime(executeTime);
-        executeRepository.save(execute);
+//        executeRepository.save(execute);
+        relations.add(execute);
+        log.info("[NOTICE]: I'm handling Execute.");
     }
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
@@ -145,10 +220,88 @@ public class HandleDataServiceImpl implements HandleDataService {
             table = new Table(content[0], content[1]);
             table = tableRepository.save(table);
         }
-//        Contain contain = new Contain(baseRelation);
-//        contain.setSql();
-//        contain.setTable(table);
+        Contain contain = new Contain(baseRelation);
+        contain.setSql(TMP_SQL);
+        contain.setTable(table);
 //        containRepository.save(contain);
+        relations.add(contain);
+        log.info("[NOTICE]: I'm handling Table.");
     }
 
+    private void clearDatabase() {
+        methodRepository.deleteAll();
+        sqlRepository.deleteAll();
+        tableRepository.deleteAll();
+        containRepository.deleteAll();
+        executeRepository.deleteAll();
+        methodCallRepository.deleteAll();
+        log.info("[NOTICE]: Clear all data.");
+    }
+
+//    private List<BaseRelation> getTraceLevelRelations(Long traceId, Integer level){
+//        List<MethodCall> methodCalls = methodCallRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
+//        List<Execute> executes = executeRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
+//        List<Contain> contains = containRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
+//        List<BaseRelation> levelRelations = new ArrayList<>();
+//        levelRelations.addAll(methodCalls);
+//        levelRelations.addAll(executes);
+//        levelRelations.addAll(contains);
+//        Collections.sort(levelRelations);
+//        return levelRelations;
+//    }
+
+//    private List<BaseRelation> getTraceRelations(Long traceId){
+//        log.info("[NOTICE]: Start get trace relations:" + getTime());
+//        List<MethodCall> methodCalls = methodCallRepository.findAllByTraceId(traceId);
+//        List<Execute> executes = executeRepository.findAllByTraceIdOrderByOrder(traceId);
+//        List<Contain> contains = containRepository.findAllByTraceIdOrderByOrder(traceId);
+//        log.info("[NOTICE]: End get trace relations:" + getTime());
+//        List<BaseRelation> traceRelations = new ArrayList<>();
+//        traceRelations.addAll(methodCalls);
+//        traceRelations.addAll(executes);
+//        traceRelations.addAll(contains);
+//        Collections.sort(traceRelations);
+//        return traceRelations;
+//    }
+
+    private Map<Long, List<BaseRelation>> getRelations(){
+        log.info("[NOTICE]: Start get trace relations:" + getTime());
+        List<MethodCall> methodCalls = (List<MethodCall>) methodCallRepository.findAll();
+        List<Execute> executes = (List<Execute>) executeRepository.findAll();
+        List<Contain> contains = (List<Contain>) containRepository.findAll();
+        log.info("[NOTICE]: End get trace relations:" + getTime());
+        List<BaseRelation> traceRelations = new ArrayList<>();
+        traceRelations.addAll(methodCalls);
+        traceRelations.addAll(executes);
+        traceRelations.addAll(contains);
+        return traceRelations.stream().collect(Collectors.groupingBy(BaseRelation::getTraceId));
+    }
+
+    private Map<Long, List<BaseRelation>> getLocalRelations(){
+        return this.relations.stream().collect(Collectors.groupingBy(BaseRelation::getTraceId));
+    }
+
+
+    private void changeParent(BaseRelation parent, BaseRelation child){
+//        log.info("[NOTICE]: Start update parent:" + getTime());
+        if(child instanceof MethodCall){
+            MethodCall childMethodCall = (MethodCall) child;
+            MethodCall parentMethodCall = (MethodCall) parent;
+            childMethodCall.setMethod(parentMethodCall.getCalledMethod());
+            methodCallRepository.save(childMethodCall);
+        }
+        else if(child instanceof Execute){
+            Execute childExecute = (Execute) child;
+            MethodCall parentMethodCall = (MethodCall) parent;
+            childExecute.setMethod(parentMethodCall.getCalledMethod());
+            executeRepository.save(childExecute);
+        }
+        else if(child instanceof Contain){
+            Contain childContain = (Contain) child;
+            Execute parentExecute = (Execute) parent;
+            childContain.setSql(parentExecute.getSql());
+            containRepository.save(childContain);
+        }
+//        log.info("[NOTICE]: End update parent:" + getTime());
+    }
 }
