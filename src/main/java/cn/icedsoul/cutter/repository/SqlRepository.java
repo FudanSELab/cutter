@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.repository;
 
 import cn.icedsoul.cutter.domain.Sql;
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +18,9 @@ public interface SqlRepository extends Neo4jRepository<Sql, Long> {
      * @return
      */
     Sql findByDatabaseNameAndAndSql(String databaseName, String sql);
+
+    @Query("match (m:Method)-[r:EXECUTE]->(s:Sql) " +
+            "where r.scenarioFrequency > 0 and id(s)={0}" +
+            "return sum(r.scenarioFrequency)")
+    double getSumSqlFrequencyBySqlId(long slqId);
 }

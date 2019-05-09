@@ -21,4 +21,12 @@ public interface MethodCallRepository extends Neo4jRepository<MethodCall, Long> 
     @Query("match (a:Method{methodName:'Entry'})-[r:METHOD_CALL]->()" +
             "return distinct r.scenarioId")
     List<String> listAllScenario();
+
+    @Query("match (a:Method{methodName:'Entry'})-[r:METHOD_CALL{traceId:{0}}]->()" +
+            "return distinct r.scenarioFrequency")
+    List<Double> getTraceFrequencyByTraceId(long traceId);
+
+    @Query("match (a:Method{methodName:'Entry'})-[r:METHOD_CALL{scenarioId:{0}}]->()" +
+            "return distinct r.scenarioFrequency")
+    List<Double> getTraceFrequencyByScenarioId(String scenarioId);
 }

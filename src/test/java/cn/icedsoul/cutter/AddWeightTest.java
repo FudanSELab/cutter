@@ -46,16 +46,6 @@ public class AddWeightTest {
         addSameTraceWeight();
         addSameScenarioWeight();
 
-//        List<Method> l = methodRepository.findEntry();
-//        if(l != null && l.size() == 1){
-//            Method entry = l.get(0);
-//            System.out.println("entryId="+entry.getId());
-//
-//
-//        } else {
-//            System.out.println("Error: Entry node is not exist or is not unique!");
-//        }
-
     }
 
     public void addSameScenarioWeight(){
@@ -63,27 +53,41 @@ public class AddWeightTest {
         if(scenarioList != null){
             for(String scenarioId:scenarioList){
                 if(null != scenarioId && !"<no-scenario-id>".equals(scenarioId)){
-                    System.out.println("======scenarioId="+scenarioId);
-                    List<Table> tables = tableRepository.findTablesOfSameScenario(scenarioId);
-                    for(int i = 0; i < tables.size(); i++) {
-                        for (int j = i + 1; j < tables.size(); j++) {
-                            List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTable(
-                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName());
-                            if(null == closeToList || closeToList.size() == 0){
-                                CloseTo closeTo = new CloseTo();
-                                closeTo.setStartTable(tables.get(i));
-                                closeTo.setEndTable(tables.get(j));
-                                closeTo.setWeight(addWeightBySameScenario(0));
-                                closeToRepository.save(closeTo);
-                            } else if(closeToList.size() > 1){
-                                System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                            } else {
-//                            double d = closeToRepository.setWeight(
-//                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-//                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-//                                    addWeightBySameSql(closeToList.get(0)));
-//                            System.out.println("final weight=" + d);
+                    List<Double> fl = methodCallRepository.getTraceFrequencyByScenarioId(scenarioId);
+                    if(fl == null || fl.size() != 1){
+                        System.out.println("!!!Error! one trace has different scenarioFrequency!!!");
+                        break;
+                    }
+                    double scenarioFrequency = fl.get(0);
+                    System.out.println("======scenarioId="+scenarioId + "==scenarioFrequency=" + scenarioFrequency);
+                    if(scenarioFrequency > 0){
+                        List<Table> tables = tableRepository.findTablesOfSameScenario(scenarioId);
+                        for(int i = 0; i < tables.size(); i++) {
+                            for (int j = i + 1; j < tables.size(); j++) {
+                                int hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
+                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
+                                if(hasEdgeBefore == 0){
+                                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
+                                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
+                                    if(null == closeToList || closeToList.size() == 0){
+                                        CloseTo closeTo = new CloseTo();
+                                        closeTo.setStartTable(tables.get(i));
+                                        closeTo.setEndTable(tables.get(j));
+                                        closeTo.setLevel(3);
+                                        closeTo.setWeight(addWeightBySameScenario(0, scenarioFrequency));
+                                        closeToRepository.save(closeTo);
+                                    } else if(closeToList.size() > 1){
+                                        System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
+                                    } else {
+                                        double d = closeToRepository.setWeight(
+                                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
+                                                addWeightBySameSql(closeToList.get(0), scenarioFrequency));
+                                        System.out.println("final weight=" + d);
+                                    }
+                                }
                             }
                         }
                     }
@@ -97,30 +101,46 @@ public class AddWeightTest {
         if(traceList != null){
             for(Long traceId: traceList){
                 if(traceId > 0){
-                    System.out.println("---traceId="+traceId);
-                    List<Table> tables = tableRepository.findTablesOfSameTrace(traceId);
-                    for(int i = 0; i < tables.size(); i++){
-                        for(int j = i +1; j < tables.size(); j++){
-                            List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTable(
-                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName());
-                            if(null == closeToList || closeToList.size() == 0){
-                                CloseTo closeTo = new CloseTo();
-                                closeTo.setStartTable(tables.get(i));
-                                closeTo.setEndTable(tables.get(j));
-                                closeTo.setWeight(addWeightBySameTrace(0));
-                                closeToRepository.save(closeTo);
-                            } else if(closeToList.size() > 1){
-                                System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                            } else {
-//                            double d = closeToRepository.setWeight(
-//                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-//                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-//                                    addWeightBySameSql(closeToList.get(0)));
-//                            System.out.println("final weight=" + d);
+                    //获取一条trace对应的scenarioFrequency
+                    List<Double> tl = methodCallRepository.getTraceFrequencyByTraceId(traceId);
+                    if(null == tl || tl.size() != 1){
+                        System.out.println("!!!Error! one scenario has different scenarioFrequency!!!");
+                        break;
+                    }
+                    double traceFrequency = tl.get(0);
+                    System.out.println("---traceId="+traceId +" ---traceFrequency=" + traceFrequency);
+                    if(traceFrequency > 0){
+                        List<Table> tables = tableRepository.findTablesOfSameTrace(traceId);
+                        for(int i = 0; i < tables.size(); i++){
+                            for(int j = i +1; j < tables.size(); j++){
+                                int hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
+                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),2);
+                                if(hasEdgeBefore == 0){
+                                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
+                                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(), 2);
+                                    if(null == closeToList || closeToList.size() == 0){
+                                        CloseTo closeTo = new CloseTo();
+                                        closeTo.setStartTable(tables.get(i));
+                                        closeTo.setEndTable(tables.get(j));
+                                        closeTo.setLevel(2);
+                                        closeTo.setWeight(addWeightBySameTrace(0, traceFrequency));
+                                        closeToRepository.save(closeTo);
+                                    } else if(closeToList.size() > 1){
+                                        System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
+                                    } else {
+                                        double d = closeToRepository.setWeight(
+                                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
+                                                addWeightBySameTrace(closeToList.get(0), traceFrequency));
+                                        System.out.println("final weight=" + d);
+                                    }
+                                }
                             }
                         }
                     }
+
                 }
             }
         }
@@ -130,21 +150,24 @@ public class AddWeightTest {
         Iterator<Sql> sqlIterator = sqlRepository.findAll().iterator();
         while(sqlIterator.hasNext()){
             Sql sql = sqlIterator.next();
-            System.out.println(sql.toString());
+            System.out.println("---sql:"+sql.toString());
+            double sqlFrequency = sqlRepository.getSumSqlFrequencyBySqlId(sql.getId());
+            System.out.println("---sqlId="+sql.getId() + " frequency=" + sqlFrequency);
             List<Table> tables = tableRepository.findTablesBySql(sql.getDatabaseName(), sql.getSql());
             System.out.println(tables.toString());
             if(tables != null && tables.size() > 1){
                 for(int i = 0; i < tables.size(); i++){
                     for(int j = i + 1; j < tables.size(); j++){
-                        List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTable(
+                        List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
                                 tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                tables.get(j).getDatabaseName(), tables.get(j).getTableName());
+                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),1);
                         System.out.println("-----"+closeToList);
                         if(null == closeToList || closeToList.size() == 0){
                             CloseTo closeTo = new CloseTo();
                             closeTo.setStartTable(tables.get(i));
                             closeTo.setEndTable(tables.get(j));
-                            closeTo.setWeight(addWeightBySameSql(0));
+                            closeTo.setLevel(1);
+                            closeTo.setWeight(addWeightBySameSql(0, sqlFrequency));
                             closeToRepository.save(closeTo);
                         } else if(closeToList.size() > 1){
                             System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
@@ -152,7 +175,7 @@ public class AddWeightTest {
                             double d = closeToRepository.setWeight(
                                     tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
                                     tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                    addWeightBySameSql(closeToList.get(0)));
+                                    addWeightBySameSql(closeToList.get(0), sqlFrequency));
                             System.out.println("final weight=" + d);
                         }
                     }
@@ -161,18 +184,18 @@ public class AddWeightTest {
         }
     }
 
-    public double addWeightBySameSql(double weight){
+    public double addWeightBySameSql(double weight, double sqlFrequency){
         //TODO 根据频率增加weight
-        return weight + 100;
+        return weight + 100*sqlFrequency;
     }
 
-    public double addWeightBySameTrace(double weight){
+    public double addWeightBySameTrace(double weight, double traceFrequency){
         //TODO 根据频率增加weight
-        return weight + 50;
+        return weight + 50*traceFrequency;
     }
 
-    public double addWeightBySameScenario(double weight){
+    public double addWeightBySameScenario(double weight, double scenarioFrequency){
         //TODO 根据频率增加weight
-        return weight + 10;
+        return weight + 10*scenarioFrequency;
     }
 }
