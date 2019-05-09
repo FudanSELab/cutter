@@ -136,7 +136,7 @@ public class HandleDataServiceImpl implements HandleDataService {
             }
             return;
         }
-        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11], Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
+        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11], Double.valueOf(lines[12]), Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
         if(NODE_TYPE_CLASS_FUNCTION.equals(lines[7])) {
             Method method = handleMethod(lines[2]);
             handleMethodCall(method, Long.valueOf(lines[5]), Long.valueOf(lines[6]), baseRelation);

@@ -30,7 +30,7 @@ public class Contain extends BaseRelation {
 
     public Contain(BaseRelation baseRelation){
         super(baseRelation.getTraceId(), baseRelation.getSessionId(),
-                baseRelation.getScenarioId(), baseRelation.getScenarioName(),
+                baseRelation.getScenarioId(), baseRelation.getScenarioName(), baseRelation.getScenarioFrequency(),
                 baseRelation.getLevel(), baseRelation.getOrder());
     }
 

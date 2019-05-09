@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 基本关系
+ *
  * @author IcedSoul
  * @date 19-5-5 下午4:53
  */
@@ -16,6 +18,7 @@ public class BaseRelation implements Comparable<BaseRelation> {
     private String sessionId;
     private String scenarioId;
     private String scenarioName;
+    private Double scenarioFrequency;
     private Integer level;
     private Integer order;
 
