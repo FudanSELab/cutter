@@ -20,12 +20,12 @@ public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
     List<Double> findCloseToByStartTableAndEndTableAndLevel(String startDatabaseName, String startTableName,
                                                     String endDatabaseName, String endTableName, int level);
 
-    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName:{2}, tableName:{3}})" +
-            "set r.weight = {4}" +
+    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO{level:{4}}]-(t2:Table{databaseName:{2}, tableName:{3}})" +
+            "set r.weight = {5}" +
             "return r.weight")
     double setWeight(String startDabaseName, String startTableName,
                       String endDatabaseName, String endTableName,
-                      double weight);
+                      int level, double weight);
 
 
     /**

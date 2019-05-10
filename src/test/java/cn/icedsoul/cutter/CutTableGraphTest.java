@@ -36,7 +36,7 @@ public class CutTableGraphTest {
         generateGraph();
         printG(G);
         if(null != G){
-            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, tableList, 4);
+            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, tableList, 3);
             Map<Integer, List<Long>> clusters = cutGraphAlgorithm.calculate();
             System.out.println("----拆分结果：---");
             System.out.println(clusters);
