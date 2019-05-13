@@ -9,10 +9,11 @@ import java.util.List;
 
 public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
 
-    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName:{2}, tableName:{3}})" +
-            "where r.level < {4}" +
-            "return count(r)")
-    int findCloseToBetweenTwoTablesAndLevelLessThan(String startDatabaseName, String startTableName,
+    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO]-(t2:Table{databaseName:{2}, tableName:{3}}) " +
+            "where r.level < {4} " +
+            "with count(r) as numr " +
+            "return toBoolean(numr <> 0)")
+    boolean findCloseToBetweenTwoTablesAndLevelLessThan(String startDatabaseName, String startTableName,
                                                      String endDatabaseName, String endTableName, int level);
 
     @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO{level:{4}}]-(t2:Table{databaseName:{2}, tableName:{3}})" +
@@ -20,8 +21,8 @@ public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
     List<Double> findCloseToByStartTableAndEndTableAndLevel(String startDatabaseName, String startTableName,
                                                     String endDatabaseName, String endTableName, int level);
 
-    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO{level:{4}}]-(t2:Table{databaseName:{2}, tableName:{3}})" +
-            "set r.weight = {5}" +
+    @Query("match (t1:Table{databaseName:{0},tableName:{1}})-[r:CLOSETO{level:{4}}]-(t2:Table{databaseName:{2}, tableName:{3}}) " +
+            "set r.weight = {5} " +
             "return r.weight")
     double setWeight(String startDabaseName, String startTableName,
                       String endDatabaseName, String endTableName,
@@ -29,12 +30,12 @@ public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
 
 
     /**
-     * 取出一个Table相连的以其为起点的CLOSETO关系
+     * 取出一个Table相连的以其为起点的CLOSETO关系,目前只考虑前三层（同SQL、同TRACE、同SCENARIO）关系
      * @param nodeId
      * @return
      */
-    @Query("match (n:Table)-[r:CLOSETO]->(t:Table)" +
-            "where id(n)={0}" +
+    @Query("match (n:Table)-[r:CLOSETO]->(t:Table) " +
+            "where id(n)={0} and r.level <= 3 " +
             "return id(n) as startTableId, id(t) as endTableId, r.weight as weight")
     List<CloseToRelation> findCloseTosOfNode(long nodeId);
 

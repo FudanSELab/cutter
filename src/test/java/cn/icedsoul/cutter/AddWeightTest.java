@@ -63,10 +63,10 @@ public class AddWeightTest {
                         List<Table> tables = tableRepository.findTablesOfSameScenario(scenarioId);
                         for(int i = 0; i < tables.size(); i++) {
                             for (int j = i + 1; j < tables.size(); j++) {
-                                int hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
+                                boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
                                         tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
                                         tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
-                                if(hasEdgeBefore == 0){
+                                if( ! hasEdgeBefore ){
                                     List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
                                             tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
                                             tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
@@ -112,10 +112,10 @@ public class AddWeightTest {
                         List<Table> tables = tableRepository.findTablesOfSameTrace(traceId);
                         for(int i = 0; i < tables.size(); i++){
                             for(int j = i +1; j < tables.size(); j++){
-                                int hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
+                                boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
                                         tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
                                         tables.get(j).getDatabaseName(), tables.get(j).getTableName(),2);
-                                if(hasEdgeBefore == 0){
+                                if( ! hasEdgeBefore ){
                                     List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
                                             tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
                                             tables.get(j).getDatabaseName(), tables.get(j).getTableName(), 2);
@@ -187,16 +187,16 @@ public class AddWeightTest {
 
     public double addWeightBySameSql(double weight, double sqlFrequency){
         //TODO 根据频率增加weight
-        return weight + 100*sqlFrequency;
+        return weight + 10*sqlFrequency + 100;
     }
 
     public double addWeightBySameTrace(double weight, double traceFrequency){
         //TODO 根据频率增加weight
-        return weight + 50*traceFrequency;
+        return weight + 5*traceFrequency + 50;
     }
 
     public double addWeightBySameScenario(double weight, double scenarioFrequency){
         //TODO 根据频率增加weight
-        return weight + 10*scenarioFrequency;
+        return weight + 2*scenarioFrequency + 10;
     }
 }
