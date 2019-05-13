@@ -40,7 +40,18 @@ public class GetPackageStructureTest {
                 }
             }
         }
-        System.out.println(rootMenu);
+        printPackageMenu(rootMenu,0);
+    }
+
+    public void printPackageMenu(PackageMenu root, int level){
+        for(int i = 0; i < level; i++){
+            System.out.print("\t");
+        }
+        System.out.print("|-");
+        System.out.println("(" + root.getId() + ")" + root.getPackageName() );
+        for(PackageMenu pm: root.getChildren()){
+            printPackageMenu(pm, level +1);
+        }
     }
 
 }
