@@ -29,4 +29,7 @@ public interface TableRepository extends Neo4jRepository<Table, Long> {
             "return distinct t" )
     List<Table> findTablesOfSameScenario(String scenarioId);
 
+    @Query("match (r:Package)-[:CONTAIN|:EXECUTE|:METHOD_CALL|:CLASS_CONTAIN|:METHOD_CONTAIN|:PACKAGE_CONTAIN*]->(t:Table) " +
+            "where id(r)={0} return distinct t")
+    List<Table> findTablesOfSamePackage(long packageId);
 }

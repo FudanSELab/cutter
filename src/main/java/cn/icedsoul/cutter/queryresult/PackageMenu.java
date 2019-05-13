@@ -22,13 +22,4 @@ public class PackageMenu {
         children.add(pm);
     }
 
-    @Override
-    public String toString(){
-        StringBuilder sb = new StringBuilder();
-        sb.append("-"+packageName);
-        for(PackageMenu pm: children){
-            sb.append("\t" + pm.toString());
-        }
-        return sb.toString();
-    }
 }
