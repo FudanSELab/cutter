@@ -28,9 +28,11 @@ public class AddPackageWeightTest {
     public void testMethod() {
         //TODO 目前需要手动输入要遍历的包名，需要改成一个函数
         long packageId = 564;
+
+        //获取一个包中涉及到的所有table
         List<Table> tables = tableRepository.findTablesOfSamePackage(packageId);
         System.out.println(tables);
-
+        //table之间两两连条边
         for(int i = 0; i < tables.size(); i++) {
             for (int j = i + 1; j < tables.size(); j++) {
                 boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
