@@ -25,6 +25,7 @@ public class Class {
     @GeneratedValue
     private Long id;
     private String className;
+    private String packageName;
 
     @JsonIgnoreProperties("class")
     @Relationship(type = "CLASS_CONTAIN", direction = Relationship.INCOMING)
@@ -33,8 +34,9 @@ public class Class {
     @Relationship(type = "METHOD_CONTAIN")
     private Set<Method> methods;
 
-    public Class(String className){
+    public Class(String packageName, String className){
         this.className = className;
+        this.packageName = packageName;
         this.classContains = new HashSet<>();
         this.methods = new HashSet<>();
     }

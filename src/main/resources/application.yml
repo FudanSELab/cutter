@@ -3,12 +3,12 @@ spring:
     neo4j:
       username: neo4j
       password: 123456
-#      uri: bolt://localhost:7687
+      uri: bolt://localhost:7687
 #      uri: bolt://10.141.211.163:7687
-      uri: bolt://10.141.211.176:7687
+#      uri: bolt://10.141.211.176:7687
 
 
 cutter:
-  #dat-file:
-  dat-file: /code/micoservice/jeesite/trace-data/kieker-20190509-025908-5570910362958-UTC--KIEKER-SINGLETON/kieker-20190509-025908078-UTC-001.dat
+  dat-file: /root/cutter/kieker-20190510-062409750-UTC-001.dat
+#  dat-file: /code/micoservice/jeesite/trace-data/kieker-20190509-025908-5570910362958-UTC--KIEKER-SINGLETON/kieker-20190509-025908078-UTC-001.dat
 

@@ -147,9 +147,9 @@ public class HandleDataServiceImpl implements HandleDataService {
                 TMP_SQL = new Sql("Temp", "Temp");
                 TMP_SQL = sqlRepository.save(TMP_SQL);
             }
-            ROOT = packageRepository.findByPackageName("Root");
+            ROOT = packageRepository.findByFullPackageName("Root");
             if(isNull(ROOT)){
-                ROOT = new Package("Root");
+                ROOT = new Package("Root", "Root");
                 ROOT = packageRepository.save(ROOT);
             }
             return;
@@ -324,10 +324,17 @@ public class HandleDataServiceImpl implements HandleDataService {
     private void buildIndex(Method method) {
         String[] packageNames = method.getPackageName().split("\\.");
         Package lastPackage = ROOT;
+        String currentName = "";
         for (String packageName : packageNames) {
-            Package aPackage = packageRepository.findByPackageName(packageName);
+            if(isNullString(currentName)){
+                currentName += packageName;
+            }
+            else {
+                currentName += "." + packageName;
+            }
+            Package aPackage = packageRepository.findByFullPackageName(currentName);
             if (isNull(aPackage)) {
-                aPackage = new Package(packageName);
+                aPackage = new Package(packageName, currentName);
                 aPackage = packageRepository.save(aPackage);
                 PackageContain packageContain = new PackageContain();
                 packageContain.setParentPackage(lastPackage);
@@ -336,9 +343,9 @@ public class HandleDataServiceImpl implements HandleDataService {
             }
             lastPackage = aPackage;
         }
-        Class clazz = classRepository.findByClassName(method.getClassName());
+        Class clazz = classRepository.findByPackageNameAndClassName(method.getPackageName(), method.getClassName());
         if (isNull(clazz)){
-            clazz = new Class(method.getClassName());
+            clazz = new Class(method.getPackageName(), method.getClassName());
             clazz = classRepository.save(clazz);
             ClassContain classContain = new ClassContain();
             classContain.setParentPackage(lastPackage);

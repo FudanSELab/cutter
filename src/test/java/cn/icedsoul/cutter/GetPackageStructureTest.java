@@ -22,7 +22,7 @@ public class GetPackageStructureTest {
 
     @Test
     public void testMethod() {
-        Package root = packageRepository.findByPackageName("Root");
+        Package root = packageRepository.findByFullPackageName("Root");
         Queue< PackageMenu> queue = new LinkedList<>();
         PackageMenu rootMenu = new PackageMenu();
         if(root != null) {

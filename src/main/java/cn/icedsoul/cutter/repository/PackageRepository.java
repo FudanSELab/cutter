@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Repository
 public interface PackageRepository extends Neo4jRepository<Package, Long> {
-    Package findByPackageName(String packageName);
+    Package findByFullPackageName(String fullPackageName);
 
     List<Package> findChildrenByPackageId(long id);
 

@@ -23,6 +23,7 @@ public class Package {
     @Id
     @GeneratedValue
     private Long id;
+    private String fullPackageName;
     private String packageName;
 
     @JsonIgnoreProperties("class")
@@ -35,8 +36,9 @@ public class Package {
     @Relationship(type = "CLASS_CONTAIN")
     private Set<Class> classes;
 
-    public Package(String packageName){
+    public Package(String packageName, String fullPackageName){
         this.packageName = packageName;
+        this.fullPackageName = fullPackageName;
         this.packageContains = new HashSet<>();
         this.packages = new HashSet<>();
         this.classes = new HashSet<>();
