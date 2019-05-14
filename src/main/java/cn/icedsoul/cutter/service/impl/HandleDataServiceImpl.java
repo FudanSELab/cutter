@@ -104,25 +104,6 @@ public class HandleDataServiceImpl implements HandleDataService {
                 }
                 lastRelations = relationList;
             }
-//            methodCallRepository.save((MethodCall) relations.get(0));
-//            int lastMark = 0, level = 1, mark = 1;
-//            while(mark < relations.size()){
-//                int tLevel = mark;
-//                while(mark < relations.size()){
-//                    BaseRelation relation = relations.get(mark);
-//                    if(relation.getLevel() > level){
-//                        level++;
-//                        break;
-//                    }
-//                    while(lastMark + 1 < tLevel && relation.getOrder() > relations.get(lastMark + 1).getOrder()){
-//                        lastMark++;
-//                    }
-//                    changeParent(relations.get(lastMark), relation);
-//                    mark++;
-//                }
-//                lastMark = tLevel;
-//
-//            }
         }
 
     }
@@ -154,7 +135,8 @@ public class HandleDataServiceImpl implements HandleDataService {
             }
             return;
         }
-        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11], Double.valueOf(lines[12]), Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
+        BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11],
+                Double.valueOf(lines[12]), lines[13], Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
         if(NODE_TYPE_CLASS_FUNCTION.equals(lines[7])) {
             Method method = handleMethod(lines[2]);
             handleMethodCall(method, Long.valueOf(lines[5]), Long.valueOf(lines[6]), baseRelation);
@@ -233,9 +215,9 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
         String[] content = dbAndTable.split(":", 2);
-        Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1]);
+        Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
         if(isNull(table)){
-            table = new Table(content[0], content[1]);
+            table = new Table(content[0], content[1].toLowerCase());
             table = tableRepository.save(table);
         }
         Contain contain = new Contain(baseRelation);
@@ -247,53 +229,22 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void clearDatabase() {
         methodRepository.clearDatabase();
-//        methodRepository.deleteAll();
-//        sqlRepository.deleteAll();
-//        tableRepository.deleteAll();
-//        containRepository.deleteAll();
-//        executeRepository.deleteAll();
-//        methodCallRepository.deleteAll();
         log.info("[NOTICE]: Clear all data.");
     }
 
-//    private List<BaseRelation> getTraceLevelRelations(Long traceId, Integer level){
-//        List<MethodCall> methodCalls = methodCallRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
-//        List<Execute> executes = executeRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
-//        List<Contain> contains = containRepository.findAllByTraceIdAndLevelOrderByOrder(traceId, level);
-//        List<BaseRelation> levelRelations = new ArrayList<>();
-//        levelRelations.addAll(methodCalls);
-//        levelRelations.addAll(executes);
-//        levelRelations.addAll(contains);
-//        Collections.sort(levelRelations);
-//        return levelRelations;
-//    }
 
-//    private List<BaseRelation> getTraceRelations(Long traceId){
+//    private Map<Long, List<BaseRelation>> getRelations(){
 //        log.info("[NOTICE]: Start get trace relations:" + getTime());
-//        List<MethodCall> methodCalls = methodCallRepository.findAllByTraceId(traceId);
-//        List<Execute> executes = executeRepository.findAllByTraceIdOrderByOrder(traceId);
-//        List<Contain> contains = containRepository.findAllByTraceIdOrderByOrder(traceId);
+//        List<MethodCall> methodCalls = (List<MethodCall>) methodCallRepository.findAll();
+//        List<Execute> executes = (List<Execute>) executeRepository.findAll();
+//        List<Contain> contains = (List<Contain>) containRepository.findAll();
 //        log.info("[NOTICE]: End get trace relations:" + getTime());
 //        List<BaseRelation> traceRelations = new ArrayList<>();
 //        traceRelations.addAll(methodCalls);
 //        traceRelations.addAll(executes);
 //        traceRelations.addAll(contains);
-//        Collections.sort(traceRelations);
-//        return traceRelations;
+//        return traceRelations.stream().collect(Collectors.groupingBy(BaseRelation::getTraceId));
 //    }
-
-    private Map<Long, List<BaseRelation>> getRelations(){
-        log.info("[NOTICE]: Start get trace relations:" + getTime());
-        List<MethodCall> methodCalls = (List<MethodCall>) methodCallRepository.findAll();
-        List<Execute> executes = (List<Execute>) executeRepository.findAll();
-        List<Contain> contains = (List<Contain>) containRepository.findAll();
-        log.info("[NOTICE]: End get trace relations:" + getTime());
-        List<BaseRelation> traceRelations = new ArrayList<>();
-        traceRelations.addAll(methodCalls);
-        traceRelations.addAll(executes);
-        traceRelations.addAll(contains);
-        return traceRelations.stream().collect(Collectors.groupingBy(BaseRelation::getTraceId));
-    }
 
     private Map<Long, List<BaseRelation>> getLocalRelations(){
         return this.relations.stream().collect(Collectors.groupingBy(BaseRelation::getTraceId));

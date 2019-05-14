@@ -19,6 +19,7 @@ public class BaseRelation implements Comparable<BaseRelation> {
     private String scenarioId;
     private String scenarioName;
     private Double scenarioFrequency;
+    private String moduleName;
     private Integer level;
     private Integer order;
 
