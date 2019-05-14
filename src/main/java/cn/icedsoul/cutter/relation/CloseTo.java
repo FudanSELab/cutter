@@ -22,7 +22,7 @@ public class CloseTo {
     @EndNode
     private Table endTable;
 
-    //1:同sql 2：同trace 3：同scenario
+    //1:同sql 2：同trace 3：同scenario 4:同package 5：同module
     private int level;
 
     //the weight between two tables
