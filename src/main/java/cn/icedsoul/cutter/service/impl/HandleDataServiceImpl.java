@@ -82,7 +82,7 @@ public class HandleDataServiceImpl implements HandleDataService {
         buildTree();
     }
 
-    public void buildTree() {
+    private void buildTree() {
         Map<Long, List<BaseRelation>> trace = getLocalRelations();
         for(Long traceId : trace.keySet()){
             log.info("[NOTICE]: This TraceId is " + traceId);

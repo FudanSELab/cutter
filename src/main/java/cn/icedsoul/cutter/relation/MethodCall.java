@@ -33,7 +33,7 @@ public class MethodCall extends BaseRelation{
     public MethodCall(BaseRelation baseRelation){
         super(baseRelation.getTraceId(), baseRelation.getSessionId(),
                 baseRelation.getScenarioId(), baseRelation.getScenarioName(), baseRelation.getScenarioFrequency(),
-                baseRelation.getLevel(), baseRelation.getOrder());
+                baseRelation.getModuleName(), baseRelation.getLevel(), baseRelation.getOrder());
     }
 
     @Override
