@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter;
+package cn.icedsoul.cutter.service.impl;
 
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
@@ -6,19 +6,16 @@ import cn.icedsoul.cutter.domain.Table;
 import cn.icedsoul.cutter.queryresult.CloseToRelation;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import cn.icedsoul.cutter.service.api.TableCutService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import smile.clustering.KMeans;
-import smile.clustering.SpectralClustering;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class CutTableGraphTest {
+@Service
+public class TableCutServiceImpl implements TableCutService {
 
     @Autowired
     TableRepository tableRepository;
@@ -30,20 +27,22 @@ public class CutTableGraphTest {
     double[][] G;
     //从tableid到tableList中下标的映射
     Map<Long, Integer> tableMap = new HashMap<>();
+    Map<Integer, List<Long>> clusters;
 
-    @Test
-    public void testMethod() {
+    @Override
+    public Map<Integer, List<Long>> cutTable() {
         generateGraph();
         printG(G);
         if(null != G){
             CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, tableList, 4);
-            Map<Integer, List<Long>> clusters = cutGraphAlgorithm.calculate();
+            clusters = cutGraphAlgorithm.calculate();
             System.out.println("----拆分结果：---");
             System.out.println(clusters);
         }
+        return clusters;
     }
 
-    public void printG(double[][] G){
+    private void printG(double[][] G){
         int n = G.length;
         System.out.println("---邻接矩阵：");
         for(int i = 0; i < n; i++){
@@ -54,7 +53,7 @@ public class CutTableGraphTest {
         }
     }
 
-    public void generateGraph(){
+    private void generateGraph(){
         tableList = (List)tableRepository.findAll();
         if(null != tableList){
             tableSize = tableList.size();
@@ -77,28 +76,10 @@ public class CutTableGraphTest {
         }
     }
 
-    public void initTableMap(){
+    private void initTableMap(){
         tableMap.clear();
         for(int i = 0; i < tableSize; i++){
             tableMap.put(tableList.get(i).getId(), i);
         }
     }
-
-
-//    public void cutGraphBySpectralClustering(int k){
-//        if(null == G || k > G.length) return;
-//
-//        SpectralClustering sc = new SpectralClustering(G, k);
-//        Map<Integer, List<Table>> clusters = new HashMap<>();
-//        for(int i = 0; i < sc.getNumClusters(); i ++){
-//            clusters.put(i, new ArrayList<>());
-//        }
-//        int[] labels = sc.getClusterLabel();
-//        for(int i = 0; i < labels.length; i++){
-//            clusters.get(labels[i]).add(tableList.get(i));
-//        }
-//        System.out.println(clusters);
-//    }
-
-
 }

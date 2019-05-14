@@ -35,6 +35,7 @@ public interface MethodCallRepository extends Neo4jRepository<MethodCall, Long> 
     List<Double> getTraceFrequencyByScenarioId(String scenarioId);
 
     @Query("match (a:Method{methodName:'Entry'})-[r:METHOD_CALL{moduleName:{0}}]->() " +
+            "where r.scenarioFrequency>0 " +
             "return sum(r.scenarioFrequency)")
     Double getModuleFrequencyByModuleName(String moduleName);
 

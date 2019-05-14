@@ -30,12 +30,12 @@ public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
 
 
     /**
-     * 取出一个Table相连的以其为起点的CLOSETO关系,目前只考虑前三层（同SQL、同TRACE、同SCENARIO）关系
+     * 取出一个Table相连的以其为起点的CLOSETO关系,目前考虑五层（同SQL、同TRACE、同SCENARIO、同MODULE）关系
      * @param nodeId
      * @return
      */
     @Query("match (n:Table)-[r:CLOSETO]->(t:Table) " +
-            "where id(n)={0} and r.level <= 3 " +
+            "where id(n)={0} and r.level <= 5 " +
             "return id(n) as startTableId, id(t) as endTableId, r.weight as weight")
     List<CloseToRelation> findCloseTosOfNode(long nodeId);
 
