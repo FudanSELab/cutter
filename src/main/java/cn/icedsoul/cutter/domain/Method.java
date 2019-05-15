@@ -33,19 +33,19 @@ public class Method {
     private String methodName;
     private List<String> params;
 
-    @JsonIgnoreProperties("method")
-    @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
-    private Set<MethodCall> callMethods;
-
-    @JsonIgnoreProperties("class")
-    @Relationship(type = "METHOD_CONTAIN", direction = Relationship.INCOMING)
-    private Set<MethodContain> methodContains;
-
-    @Relationship(type = "METHOD_CALL")
-    private Set<Method> methods;
-
-    @Relationship(type = "EXECUTE")
-    private Set<Sql> sql;
+//    @JsonIgnoreProperties("method")
+//    @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
+//    private Set<MethodCall> callMethods;
+//
+//    @JsonIgnoreProperties("class")
+//    @Relationship(type = "METHOD_CONTAIN", direction = Relationship.INCOMING)
+//    private Set<MethodContain> methodContains;
+//
+//    @Relationship(type = "METHOD_CALL")
+//    private Set<Method> methods;
+//
+//    @Relationship(type = "EXECUTE")
+//    private Set<Sql> sql;
 
     public Method(List<String> modifier, String returnType,  String packageName,  String className,String methodName, List<String> params){
         this.modifier = modifier;
@@ -54,9 +54,9 @@ public class Method {
         this.className = className;
         this.methodName = methodName;
         this.params = params;
-        this.callMethods = new HashSet<>();
-        this.methodContains = new HashSet<>();
-        this.methods = new HashSet<>();
-        this.sql = new HashSet<>();
+//        this.callMethods = new HashSet<>();
+//        this.methodContains = new HashSet<>();
+//        this.methods = new HashSet<>();
+//        this.sql = new HashSet<>();
     }
 }

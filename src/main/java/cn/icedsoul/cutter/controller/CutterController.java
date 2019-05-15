@@ -20,8 +20,8 @@ public class CutterController {
 
     @CrossOrigin(origins = "*")
     @RequestMapping(value = "/cuttable", method ={RequestMethod.GET})
-    public void cutTable(){
-        tableCutService.cutTable();
+    public void cutTable(@RequestParam(required = true) int k){
+        tableCutService.cutTable(k);
     }
 
 }

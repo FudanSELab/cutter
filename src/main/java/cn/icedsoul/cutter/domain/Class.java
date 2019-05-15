@@ -27,17 +27,17 @@ public class Class {
     private String className;
     private String packageName;
 
-    @JsonIgnoreProperties("class")
-    @Relationship(type = "CLASS_CONTAIN", direction = Relationship.INCOMING)
-    private Set<ClassContain> classContains;
-
-    @Relationship(type = "METHOD_CONTAIN")
-    private Set<Method> methods;
+//    @JsonIgnoreProperties("class")
+//    @Relationship(type = "CLASS_CONTAIN", direction = Relationship.INCOMING)
+//    private Set<ClassContain> classContains;
+//
+//    @Relationship(type = "METHOD_CONTAIN")
+//    private Set<Method> methods;
 
     public Class(String packageName, String className){
         this.className = className;
         this.packageName = packageName;
-        this.classContains = new HashSet<>();
-        this.methods = new HashSet<>();
+//        this.classContains = new HashSet<>();
+//        this.methods = new HashSet<>();
     }
 }

@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface CutGraphAlgorithm {
 
-    Map<Integer, List<Long>> calculate();
+    Map<Integer, List<Integer>> calculate();
 }

@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface TableCutService {
 
-    Map<Integer, List<Long>> cutTable();
+    Map<Integer, List<String>> cutTable(int k);
 }

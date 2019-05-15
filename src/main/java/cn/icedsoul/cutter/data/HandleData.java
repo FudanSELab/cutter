@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.data;
 
 import cn.icedsoul.cutter.service.api.HandleDataService;
+import cn.icedsoul.cutter.service.api.WeightCalculationService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,8 @@ public class HandleData implements ApplicationRunner {
 
     @Autowired
     private HandleDataService handleDataService;
+    @Autowired
+    WeightCalculationService weightCalculationService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -33,5 +36,6 @@ public class HandleData implements ApplicationRunner {
         else {
             log.info("Please define the file path!");
         }
+//        weightCalculationService.addWeight();
     }
 }

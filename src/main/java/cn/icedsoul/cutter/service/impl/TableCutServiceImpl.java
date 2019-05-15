@@ -10,9 +10,7 @@ import cn.icedsoul.cutter.service.api.TableCutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TableCutServiceImpl implements TableCutService {
@@ -27,19 +25,32 @@ public class TableCutServiceImpl implements TableCutService {
     double[][] G;
     //从tableid到tableList中下标的映射
     Map<Long, Integer> tableMap = new HashMap<>();
-    Map<Integer, List<Long>> clusters;
+    Map<Integer, List<Integer>> clusters;
 
     @Override
-    public Map<Integer, List<Long>> cutTable() {
+    public Map<Integer, List<String>> cutTable(int k) {
         generateGraph();
         printG(G);
         if(null != G){
-            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, tableList, 4);
+            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
             clusters = cutGraphAlgorithm.calculate();
             System.out.println("----拆分结果：---");
-            System.out.println(clusters);
+//            System.out.println(clusters);
+            Map<Integer, List<String>> r = new HashMap<>();
+            Iterator iterator = clusters.keySet().iterator();
+            while(iterator.hasNext()){
+                int num = (int)iterator.next();
+                List<Integer> l = clusters.get(num);
+                List<String> group = new ArrayList<>();
+                for(Integer i: l){
+                    group.add(tableList.get(i).getTableName());
+                }
+                System.out.println("第"+ num + "组：" + group);
+                r.put(num, group);
+            }
+            return r;
         }
-        return clusters;
+        return null;
     }
 
     private void printG(double[][] G){

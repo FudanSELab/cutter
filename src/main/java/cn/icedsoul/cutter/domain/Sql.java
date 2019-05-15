@@ -29,17 +29,17 @@ public class Sql {
     private String databaseName;
     private String sql;
 
-    @JsonIgnoreProperties("sql")
-    @Relationship(type = "EXECUTE", direction = Relationship.INCOMING)
-    private Set<Execute> executes;
-
-    @Relationship(type = "CONTAIN")
-    private Set<Table> tables;
+//    @JsonIgnoreProperties("sql")
+//    @Relationship(type = "EXECUTE", direction = Relationship.INCOMING)
+//    private Set<Execute> executes;
+//
+//    @Relationship(type = "CONTAIN")
+//    private Set<Table> tables;
 
     public Sql(String databaseName, String sql){
         this.databaseName = databaseName;
         this.sql = sql;
-        this.executes = new HashSet<>();
-        this.tables = new HashSet<>();
+//        this.executes = new HashSet<>();
+//        this.tables = new HashSet<>();
     }
 }

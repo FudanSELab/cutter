@@ -28,17 +28,17 @@ public class Table{
     private String databaseName;
     private String tableName;
 
-    @JsonIgnoreProperties("table")
-    @Relationship(type = "CONTAIN", direction = Relationship.INCOMING)
-    private Set<Contain> contains;
+//    @JsonIgnoreProperties("table")
+//    @Relationship(type = "CONTAIN", direction = Relationship.INCOMING)
+//    private Set<Contain> contains;
 
-    @Relationship(type = "CLOSETO")
-    private Set<Table> closeTableList;
+//    @Relationship(type = "CLOSETO")
+//    private Set<Table> closeTableList;
 
     public Table(String databaseName, String tableName){
         this.databaseName = databaseName;
         this.tableName = tableName;
-        this.contains = new HashSet<>();
+//        this.contains = new HashSet<>();
     }
 
     @Override

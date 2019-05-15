@@ -11,13 +11,11 @@ import java.util.Map;
 public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
 
     double[][] G;
-    List<Table> tableList;
     int k;
 
 
-    public SpectralClusteringAlgorithm(double[][] G, List<Table> tableList, int k){
+    public SpectralClusteringAlgorithm(double[][] G, int k){
         this.G = G;
-        this.tableList = tableList;
         this.k = k;
     }
 
@@ -34,9 +32,9 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
     }
 
     @Override
-    public Map<Integer, List<Long>> calculate() {
+    public Map<Integer, List<Integer>> calculate() {
         preProcess();
-        Map<Integer, List<Long>> clusters = new HashMap<>();
+        Map<Integer, List<Integer>> clusters = new HashMap<>();
 
         if(null == G || k > G.length) return clusters;
 
@@ -46,7 +44,7 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
         }
         int[] labels = sc.getClusterLabel();
         for(int i = 0; i < labels.length; i++){
-            clusters.get(labels[i]).add(tableList.get(i).getId());
+            clusters.get(labels[i]).add(i);
         }
         return clusters;
     }

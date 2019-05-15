@@ -26,21 +26,21 @@ public class Package {
     private String fullPackageName;
     private String packageName;
 
-    @JsonIgnoreProperties("class")
-    @Relationship(type = "PACKAGE_CONTAIN", direction = Relationship.INCOMING)
-    private Set<PackageContain> packageContains;
-
-    @Relationship(type = "PACKAGE_CONTAIN")
-    private Set<Package> packages;
-
-    @Relationship(type = "CLASS_CONTAIN")
-    private Set<Class> classes;
+//    @JsonIgnoreProperties("class")
+//    @Relationship(type = "PACKAGE_CONTAIN", direction = Relationship.INCOMING)
+//    private Set<PackageContain> packageContains;
+//
+//    @Relationship(type = "PACKAGE_CONTAIN")
+//    private Set<Package> packages;
+//
+//    @Relationship(type = "CLASS_CONTAIN")
+//    private Set<Class> classes;
 
     public Package(String packageName, String fullPackageName){
         this.packageName = packageName;
         this.fullPackageName = fullPackageName;
-        this.packageContains = new HashSet<>();
-        this.packages = new HashSet<>();
-        this.classes = new HashSet<>();
+//        this.packageContains = new HashSet<>();
+//        this.packages = new HashSet<>();
+//        this.classes = new HashSet<>();
     }
 }
