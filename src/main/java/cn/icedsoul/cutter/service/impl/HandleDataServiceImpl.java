@@ -215,6 +215,9 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
         String[] content = dbAndTable.split(":", 2);
+        if("dual".equals(content[1]) || content[1].contains(".")){
+            return;
+        }
         Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
         if(isNull(table)){
             table = new Table(content[0], content[1].toLowerCase());
