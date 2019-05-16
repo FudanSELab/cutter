@@ -1,0 +1,30 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j
+    restart: always
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - $HOME/neo4j/data:/data
+      - $HOME/neo4j/logs:/logs
+      - $HOME/neo4j/conf:/conf
+    networks:
+      - my-network
+
+
+  cutter:
+    build: cutter
+    depends_on:
+      - neo4j
+    image: fdse/cutter
+    restart: always
+    ports:
+      - 16318:16318
+    networks:
+      - my-network
+
+networks:
+    my-network:
+      driver: bridge
