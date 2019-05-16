@@ -26,7 +26,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Cutter")
-                .description("to micoservice")
+                .description("to microservices")
                 .termsOfServiceUrl("")
                 .version("1.0")
                 .build();

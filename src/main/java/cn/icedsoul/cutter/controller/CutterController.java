@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 
+import static cn.icedsoul.cutter.util.Common.isNullString;
+
 /**
  * @author icedsoul
  */
@@ -29,8 +31,10 @@ public class CutterController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/data")
     @ApiOperation(value = "Read dat file", notes = "Add nodes and relations")
-    public void handleData(@PathParam("file")String file){
-        handleDataService.handleData(file);
+    public void handleData(@RequestParam("file") String file){
+        if(!isNullString(file)){
+            handleDataService.handleData(file);
+        }
     }
 
     @CrossOrigin(origins = "*")
@@ -43,7 +47,7 @@ public class CutterController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/cut")
     @ApiOperation(value = "Cut table", notes = "Cut table to k parts")
-    public void cutTable(@PathParam("k") int k){
+    public void cutTable(@RequestParam("k") int k){
         tableCutService.cutTable(k);
     }
 
