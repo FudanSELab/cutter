@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
 
+import java.util.List;
+import java.util.Map;
+
 import static cn.icedsoul.cutter.util.Common.isNullString;
 
 /**
@@ -47,8 +50,8 @@ public class CutterController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/cut")
     @ApiOperation(value = "Cut table", notes = "Cut table to k parts")
-    public void cutTable(@RequestParam("k") int k){
-        tableCutService.cutTable(k);
+    public Map<Integer, List<String>> cutTable(@RequestParam("k") int k){
+        return tableCutService.cutTable(k);
     }
 
 }
