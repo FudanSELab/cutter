@@ -54,4 +54,11 @@ public class CutterController {
         return tableCutService.cutTable(k);
     }
 
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/communitydetection")
+    @ApiOperation(value = "Cut table with", notes = "Cut table with community detection algorithm")
+    public Map<Integer, List<String>> communityDetection(){
+        return tableCutService.communityDetection();
+    }
+
 }

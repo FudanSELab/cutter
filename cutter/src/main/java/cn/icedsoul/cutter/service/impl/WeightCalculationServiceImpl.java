@@ -30,6 +30,13 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     @Autowired
     CloseToRepository closeToRepository;
 
+    private final static int SQL_LEVEL = 1;
+    private final static int TRACE_LEVEL = 2;
+    private final static int SCENARIO_LEVEL = 3;
+    private final static int PACKAGE_LEVEL = 4;
+    private final static int MODULE_LEVEL = 5;
+
+
     @Override
     public void addWeight() {
         //clean up
@@ -38,7 +45,8 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         addSameSqlWeight();
         addSameTraceWeight();
         addSameScenarioWeight();
-        addSameModuleWeight();
+//        addSameModuleWeight();
+        System.out.println("!!!Finish adding weight!!!");
     }
 
     @Override
@@ -56,32 +64,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                 //查询这条sql操作的所有table，两两之间连条边
                 List<Table> tables = tableRepository.findTablesBySql(sql.getDatabaseName(), sql.getSql());
                 System.out.println(tables.toString());
-                if(tables != null && tables.size() > 1){
-                    for(int i = 0; i < tables.size(); i++){
-                        for(int j = i + 1; j < tables.size(); j++){
-                            List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
-                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName(),1);
-                            System.out.println("-----"+closeToList);
-                            if(null == closeToList || closeToList.size() == 0){
-                                CloseTo closeTo = new CloseTo();
-                                closeTo.setStartTable(tables.get(i));
-                                closeTo.setEndTable(tables.get(j));
-                                closeTo.setLevel(1);
-                                closeTo.setWeight(addWeightBySameSql(0, sqlFrequency));
-                                closeToRepository.save(closeTo);
-                            } else if(closeToList.size() > 1){
-                                System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                            } else {
-                                double d = closeToRepository.setWeight(
-                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                        1,  addWeightBySameSql(closeToList.get(0), sqlFrequency));
-//                                System.out.println("final weight=" + d);
-                            }
-                        }
-                    }
-                }
+                checkAndSetWeight(tables, SQL_LEVEL, sqlFrequency);
             }
         }
     }
@@ -105,40 +88,14 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                     if(traceFrequency > 0){
                         //获取一条trace中的所有table，两两之间连条边
                         List<Table> tables = tableRepository.findTablesOfSameTrace(traceId);
-                        for(int i = 0; i < tables.size(); i++){
-                            for(int j = i +1; j < tables.size(); j++){
-                                boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
-                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),2);
-                                if( ! hasEdgeBefore ){
-                                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
-                                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(), 2);
-                                    if(null == closeToList || closeToList.size() == 0){
-                                        CloseTo closeTo = new CloseTo();
-                                        closeTo.setStartTable(tables.get(i));
-                                        closeTo.setEndTable(tables.get(j));
-                                        closeTo.setLevel(2);
-                                        closeTo.setWeight(addWeightBySameTrace(0, traceFrequency));
-                                        closeToRepository.save(closeTo);
-                                    } else if(closeToList.size() > 1){
-                                        System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                                    } else {
-                                        double d = closeToRepository.setWeight(
-                                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                                2, addWeightBySameTrace(closeToList.get(0), traceFrequency));
-//                                        System.out.println("final weight=" + d);
-                                    }
-                                }
-                            }
-                        }
+                        checkAndSetWeight(tables, TRACE_LEVEL, traceFrequency);
                     }
-
                 }
             }
         }
     }
+
+
 
     @Override
     @Transactional
@@ -159,34 +116,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                     if(scenarioFrequency > 0){
                         //获取一个场景中涉及到的所有table，两两之间连条边
                         List<Table> tables = tableRepository.findTablesOfSameScenario(scenarioId);
-                        for(int i = 0; i < tables.size(); i++) {
-                            for (int j = i + 1; j < tables.size(); j++) {
-                                boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
-                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
-                                if( ! hasEdgeBefore ){
-                                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
-                                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(),3);
-                                    if(null == closeToList || closeToList.size() == 0){
-                                        CloseTo closeTo = new CloseTo();
-                                        closeTo.setStartTable(tables.get(i));
-                                        closeTo.setEndTable(tables.get(j));
-                                        closeTo.setLevel(3);
-                                        closeTo.setWeight(addWeightBySameScenario(0, scenarioFrequency));
-                                        closeToRepository.save(closeTo);
-                                    } else if(closeToList.size() > 1){
-                                        System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                                    } else {
-                                        double d = closeToRepository.setWeight(
-                                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                                3, addWeightBySameSql(closeToList.get(0), scenarioFrequency));
-//                                        System.out.println("final weight=" + d);
-                                    }
-                                }
-                            }
-                        }
+                        checkAndSetWeight(tables, SCENARIO_LEVEL, scenarioFrequency);
                     }
                 }
             }
@@ -206,37 +136,9 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                     System.out.println("--moduleFrequency=" + moduleFrequency);
                     //获取同一个module下的所有table
                     List<Table> tables =  tableRepository.findTablesOfSameModule(module);
-                    System.out.println(tables);
+//                    System.out.println(tables);
                     //table之间两两连条边
-                    for(int i = 0; i < tables.size(); i++) {
-                        for (int j = i + 1; j < tables.size(); j++) {
-                            boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
-                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName(),5);
-                            if( ! hasEdgeBefore ){
-                                List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
-                                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),5);
-                                if(null == closeToList || closeToList.size() == 0){
-                                    CloseTo closeTo = new CloseTo();
-                                    closeTo.setStartTable(tables.get(i));
-                                    closeTo.setEndTable(tables.get(j));
-                                    closeTo.setLevel(5);
-                                    closeTo.setWeight(addWeightBySameModule(0, moduleFrequency));
-                                    closeToRepository.save(closeTo);
-                                } else if(closeToList.size() > 1){
-                                    System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                                } else {
-                                    double d = closeToRepository.setWeight(
-                                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                            5, addWeightBySameModule(closeToList.get(0), moduleFrequency));
-//                                    System.out.println("final weight=" + d);
-                                }
-                            }
-                        }
-                    }
-
+                    checkAndSetWeight(tables, MODULE_LEVEL, moduleFrequency);
                 }
             }
         }
@@ -252,64 +154,65 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         List<Table> tables = tableRepository.findTablesOfSamePackage(packageId);
         System.out.println(tables);
         //table之间两两连条边
-        for(int i = 0; i < tables.size(); i++) {
-            for (int j = i + 1; j < tables.size(); j++) {
-                boolean hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
-                        tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                        tables.get(j).getDatabaseName(), tables.get(j).getTableName(),4);
-                if( ! hasEdgeBefore ){
-                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
-                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(),4);
-                    if(null == closeToList || closeToList.size() == 0){
-                        CloseTo closeTo = new CloseTo();
-                        closeTo.setStartTable(tables.get(i));
-                        closeTo.setEndTable(tables.get(j));
-                        closeTo.setLevel(4);
-                        closeTo.setWeight(addWeightBySamePackage(0));
-                        closeToRepository.save(closeTo);
-                    } else if(closeToList.size() > 1){
-                        System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
-                    } else {
-                        double d = closeToRepository.setWeight(
+        checkAndSetWeight(tables, PACKAGE_LEVEL, 0);
+    }
+
+    private void checkAndSetWeight(List<Table> tables, int level, double frequency){
+        if(tables != null){
+            for(int i = 0; i < tables.size(); i++){
+                for(int j = i +1; j < tables.size(); j++){
+                    boolean hasEdgeBefore;
+                    if(level == SQL_LEVEL){
+                        hasEdgeBefore = false;
+                    }else {
+                        hasEdgeBefore = closeToRepository.findCloseToBetweenTwoTablesAndLevelLessThan(
                                 tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
-                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
-                                4, addWeightBySamePackage(closeToList.get(0)));
-                        System.out.println("final weight=" + d);
+                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(), level);
+                    }
+                    if( ! hasEdgeBefore ){
+                        List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
+                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(), level);
+                        if(null == closeToList || closeToList.size() == 0){
+                            CloseTo closeTo = new CloseTo();
+                            closeTo.setStartTable(tables.get(i));
+                            closeTo.setEndTable(tables.get(j));
+                            closeTo.setLevel(level);
+                            closeTo.setWeight(getUpdatedWeight(0, frequency, level));
+                            closeToRepository.save(closeTo);
+                        } else if(closeToList.size() > 1){
+                            System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
+                        } else {
+                            closeToRepository.setWeight(
+                                    tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                    tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
+                                    level, getUpdatedWeight(closeToList.get(0), frequency, level));
+                        }
                     }
                 }
             }
         }
     }
 
-
-
-    private double addWeightBySameSql(double weight, double sqlFrequency){
-        //TODO 根据频率增加weight
-        return weight + 10*sqlFrequency + 100;
-//        return weight + 100;
+    private double getUpdatedWeight(double weight, double frequency, int level){
+        switch(level){
+            case SQL_LEVEL:{
+                return weight + 10*frequency + 100;
+            }
+            case TRACE_LEVEL:{
+                return weight + 5*frequency + 50;
+            }
+            case SCENARIO_LEVEL:{
+                return weight + 2*frequency + 10;
+            }
+            case PACKAGE_LEVEL:{
+                return weight + 5;
+            }
+            case MODULE_LEVEL:{
+                return weight + 0.1 * frequency + 5;
+            }
+            default: return -1;
+        }
     }
 
-    private double addWeightBySameTrace(double weight, double traceFrequency){
-        //TODO 根据频率增加weight
-        return weight + 5*traceFrequency + 50;
-//        return weight +  50;
-    }
-
-    private double addWeightBySameScenario(double weight, double scenarioFrequency){
-        //TODO 根据频率增加weight
-        return weight + 2*scenarioFrequency + 10;
-//        return weight +  10;
-    }
-
-    private double addWeightBySameModule(double weight, double moduleFrequency){
-        //TODO 根据频率增加weight
-        return weight + 0.1 * moduleFrequency + 5;
-//        return weight  + 5;
-    }
-
-    private double addWeightBySamePackage(double weight){
-        //TODO 根据频率增加weight
-        return weight + 5;
-    }
 }
