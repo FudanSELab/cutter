@@ -1,5 +1,6 @@
 package cn.icedsoul.cutter.service.impl;
 
+import cn.icedsoul.cutter.algorithm.CommunityDetectionAlgorithm;
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
 import cn.icedsoul.cutter.domain.Table;
@@ -30,38 +31,41 @@ public class TableCutServiceImpl implements TableCutService {
     @Override
     public Map<Integer, List<String>> cutTable(int k) {
         generateGraph();
-        printG(G);
         if(null != G){
             CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
             clusters = cutGraphAlgorithm.calculate();
-            System.out.println("----拆分结果：---");
-//            System.out.println(clusters);
-            Map<Integer, List<String>> r = new HashMap<>();
-            Iterator iterator = clusters.keySet().iterator();
-            while(iterator.hasNext()){
-                int num = (int)iterator.next();
-                List<Integer> l = clusters.get(num);
-                List<String> group = new ArrayList<>();
-                for(Integer i: l){
-                    group.add(tableList.get(i).getTableName());
-                }
-                System.out.println("第"+ num + "组：" + group);
-                r.put(num, group);
-            }
-            return r;
+            return translateClusters(clusters);
         }
         return null;
     }
 
-    private void printG(double[][] G){
-        int n = G.length;
-        System.out.println("---邻接矩阵：");
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < n;j++){
-                System.out.print(G[i][j] + " ");
-            }
-            System.out.println();
+    @Override
+    public Map<Integer, List<String>> communityDetection() {
+        generateGraph();
+        if(null != G){
+            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+            clusters = cutGraphAlgorithm.calculate();
+            return translateClusters(clusters);
         }
+        return null;
+    }
+
+
+    private Map<Integer, List<String>> translateClusters(Map<Integer, List<Integer>> clusters){
+        System.out.println("----拆分结果：---");
+        Map<Integer, List<String>> r = new HashMap<>();
+        Iterator iterator = clusters.keySet().iterator();
+        while(iterator.hasNext()){
+            int num = (int)iterator.next();
+            List<Integer> l = clusters.get(num);
+            List<String> group = new ArrayList<>();
+            for(Integer i: l){
+                group.add(tableList.get(i).getTableName());
+            }
+            System.out.println("第"+ num + "组：" + group);
+            r.put(num, group);
+        }
+        return r;
     }
 
     private void generateGraph(){

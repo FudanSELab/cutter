@@ -6,4 +6,6 @@ import java.util.Map;
 public interface TableCutService {
 
     Map<Integer, List<String>> cutTable(int k);
+
+    Map<Integer, List<String>> communityDetection();
 }
