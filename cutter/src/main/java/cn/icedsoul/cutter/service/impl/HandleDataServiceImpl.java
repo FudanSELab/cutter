@@ -183,10 +183,6 @@ public class HandleDataServiceImpl implements HandleDataService {
      *  1. 若为当前trace第一条记录，则父节点为Entry，直接插入
      *  2. 若当前trace已经有记录，则寻找到正确的位置进行插入，插入结点后调整树结构，使其保持正常
      *
-     * @param method
-     * @param startTime
-     * @param endTime
-     * @param baseRelation
      */
     private void handleMethodCall(Method method, Long startTime, Long endTime, BaseRelation baseRelation){
         MethodCall methodCall = new MethodCall(baseRelation);

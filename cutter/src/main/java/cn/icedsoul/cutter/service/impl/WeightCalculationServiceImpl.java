@@ -37,8 +37,8 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 
         addSameSqlWeight();
         addSameTraceWeight();
-        addSameScenarioWeight();
-        addSameModuleWeight();
+//        addSameScenarioWeight();
+//        addSameModuleWeight();
     }
 
     @Override

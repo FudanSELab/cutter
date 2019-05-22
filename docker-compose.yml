@@ -7,9 +7,9 @@ services:
       - 7474:7474
       - 7687:7687
     volumes:
-      - $HOME/neo4j/data:/data
-      - $HOME/neo4j/logs:/logs
-      - $HOME/neo4j/conf:/conf
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/conf:/conf
     networks:
       - my-network
 
