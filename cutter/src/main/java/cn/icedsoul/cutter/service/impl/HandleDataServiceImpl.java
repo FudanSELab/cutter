@@ -80,6 +80,7 @@ public class HandleDataServiceImpl implements HandleDataService {
             e.printStackTrace();
         }
         buildTree();
+        log.info("[Handle data finish!]");
     }
 
     private void buildTree() {
@@ -107,24 +108,36 @@ public class HandleDataServiceImpl implements HandleDataService {
             /**
              * 让Method和Sql 存储table list
              */
-            for(int i= levels.size() - 1; i > 0; i--){
+            for(int i = levels.size() - 1; i > 0; i--){
                 List<BaseRelation> relationList = levelRelation.get(i);
                 for(BaseRelation relation: relationList){
                     if(relation instanceof Contain){
                         Contain contain = (Contain) relation;
                         contain.getSql().addTable(contain.getTable());
+                        sqlRepository.save(contain.getSql());
                     }
                     else if(relation instanceof Execute){
                         Execute execute = (Execute) relation;
                         execute.getMethod().addTables(execute.getSql().getTables());
+                        methodRepository.save(execute.getMethod());
                     }
                     else if(relation instanceof MethodCall){
                         MethodCall methodCall = (MethodCall) relation;
                         methodCall.getMethod().addTables(methodCall.getCalledMethod().getTables());
+                        methodRepository.save(methodCall.getMethod());
                     }
                 }
             }
         }
+        handleClassTable();
+    }
+
+    private void handleClassTable() {
+        Iterable<MethodContain> methodContains = methodContainRepository.findAll();
+        methodContains.forEach(methodContain -> {
+            methodContain.getParentClass().addTables(methodContain.getMethod().getTables());
+            classRepository.save(methodContain.getParentClass());
+        });
     }
 
     private void handleSingleLine(String line){

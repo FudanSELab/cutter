@@ -44,7 +44,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 
         addSameSqlWeight();
         addSameTraceWeight();
-        addSameScenarioWeight();
+//        addSameScenarioWeight();
 //        addSameModuleWeight();
         System.out.println("!!!Finish adding weight!!!");
     }
@@ -78,7 +78,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             for(Long traceId: traceList){
                 if(traceId > 0){
                     //获取一条trace对应的scenarioFrequency
-                    List<Double> tl = methodCallRepository.getTraceFrequencyByTraceId(traceId);
+                    List<Double> tl = methodCallRepository.getFrequencyByTraceId(traceId);
                     if(null == tl || tl.size() != 1){
                         System.out.println("!!!Error! one scenario has different scenarioFrequency!!!");
                         break;
@@ -106,7 +106,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             for(String scenarioId:scenarioList){
                 if(null != scenarioId && !"<no-scenario-id>".equals(scenarioId)){
                     //获取场景的执行频率
-                    List<Double> fl = methodCallRepository.getTraceFrequencyByScenarioId(scenarioId);
+                    List<Double> fl = methodCallRepository.getFrequencyByScenarioId(scenarioId);
                     if(fl == null || fl.size() != 1){
                         System.out.println("!!!Error! one trace has different scenarioFrequency!!!");
                         break;
@@ -132,7 +132,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             for(String module: moduleList){
                 if( module != null  && !"no-module-name".equals(module)){
                     //获取module下所有trace的调用频率总和
-                    double moduleFrequency = methodCallRepository.getModuleFrequencyByModuleName(module);
+                    double moduleFrequency = methodCallRepository.getFrequencyByModuleName(module);
                     System.out.println("--moduleFrequency=" + moduleFrequency);
                     //获取同一个module下的所有table
                     List<Table> tables =  tableRepository.findTablesOfSameModule(module);
@@ -156,6 +156,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         //table之间两两连条边
         checkAndSetWeight(tables, PACKAGE_LEVEL, 0);
     }
+
 
     private void checkAndSetWeight(List<Table> tables, int level, double frequency){
         if(tables != null){

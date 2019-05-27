@@ -1,14 +1,10 @@
 package cn.icedsoul.cutter.domain;
 
-import cn.icedsoul.cutter.relation.ClassContain;
-import cn.icedsoul.cutter.relation.Execute;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +22,7 @@ public class Class {
     private Long id;
     private String className;
     private String packageName;
+    private Set<Long> tables;
 
 //    @JsonIgnoreProperties("class")
 //    @Relationship(type = "CLASS_CONTAIN", direction = Relationship.INCOMING)
@@ -33,10 +30,14 @@ public class Class {
 //
 //    @Relationship(type = "METHOD_CONTAIN")
 //    private Set<Method> methods;
+    public void addTables(Set<Long> tables){
+        this.tables.addAll(tables);
+    }
 
     public Class(String packageName, String className){
         this.className = className;
         this.packageName = packageName;
+        this.tables = new HashSet<>();
 //        this.classContains = new HashSet<>();
 //        this.methods = new HashSet<>();
     }

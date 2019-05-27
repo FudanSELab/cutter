@@ -57,11 +57,16 @@
         </dependency>
 
         <!--聚类算法-->
-        <dependency>
-            <groupId>com.github.haifengl</groupId>
-            <artifactId>smile-core</artifactId>
-            <version>1.5.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.github.haifengl</groupId>-->
+            <!--<artifactId>smile-core</artifactId>-->
+            <!--<version>1.5.2</version>-->
+        <!--</dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>cn.dingding</groupId>-->
+<!--            <artifactId>smile-core</artifactId>-->
+<!--            <version>1.5.2</version>-->
+<!--        </dependency>-->
 
         <!--Swagger-->
         <dependency>

@@ -28,7 +28,7 @@ public class Method {
     private String className;
     private String methodName;
     private List<String> params;
-    private Set<Table> tables;
+    private Set<Long> tables;
 
 //    @JsonIgnoreProperties("method")
 //    @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
@@ -43,7 +43,7 @@ public class Method {
 //
 //    @Relationship(type = "EXECUTE")
 //    private Set<Sql> sql;
-    public void addTables(Set<Table> tables){
+    public void addTables(Set<Long> tables){
         this.tables.addAll(tables);
     }
 

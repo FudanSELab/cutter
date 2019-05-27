@@ -27,7 +27,7 @@ public class Sql {
     private Long id;
     private String databaseName;
     private String sql;
-    private Set<Table> tables;
+    private Set<Long> tables;
 
 //    @JsonIgnoreProperties("sql")
 //    @Relationship(type = "EXECUTE", direction = Relationship.INCOMING)
@@ -36,7 +36,7 @@ public class Sql {
 //    @Relationship(type = "CONTAIN")
 //    private Set<Table> tables;
     public void addTable(Table table){
-        this.tables.add(table);
+        this.tables.add(table.getId());
     }
     public Sql(String databaseName, String sql){
         this.databaseName = databaseName;

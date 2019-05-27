@@ -28,26 +28,21 @@ public class Table{
     private String databaseName;
     private String tableName;
 
-//    @JsonIgnoreProperties("table")
-//    @Relationship(type = "CONTAIN", direction = Relationship.INCOMING)
-//    private Set<Contain> contains;
-
-//    @Relationship(type = "CLOSETO")
-//    private Set<Table> closeTableList;
+    //scenario sharing degree
+    private double ssd;
+    //module sharing degree
+    private double msd;
 
     public Table(String databaseName, String tableName){
         this.databaseName = databaseName;
         this.tableName = tableName;
-//        this.contains = new HashSet<>();
+        this.ssd = 0;
+        this.msd = 0;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((tableName == null) ? 0 : tableName.hashCode());
-        return result;
+        return this.id.hashCode() + this.databaseName.hashCode() + this.tableName.hashCode();
     }
 
     @Override
@@ -62,18 +57,7 @@ public class Table{
             return false;
         }
         Table other = (Table) obj;
-        if (databaseName == null) {
-            if (other.databaseName != null) {
-                return false;
-            }
-        } else if (!databaseName.equals(other.databaseName)) {
-            return false;
-        }
-        if (tableName == null) {
-            return other.tableName == null;
-        } else {
-            return tableName.equals(other.tableName);
-        }
+        return this.databaseName.equals(other.getDatabaseName()) && this.tableName.equals(other.getTableName());
     }
 
 }
