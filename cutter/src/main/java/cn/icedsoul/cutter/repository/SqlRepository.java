@@ -20,7 +20,7 @@ public interface SqlRepository extends Neo4jRepository<Sql, Long> {
     Sql findByDatabaseNameAndAndSql(String databaseName, String sql);
 
     @Query("match (m:Method)-[r:EXECUTE]->(s:Sql) " +
-            "where r.scenarioFrequency > 0 and id(s)={0}" +
+            "where id(s)={0} and r.scenarioFrequency > 0 " +
             "return sum(r.scenarioFrequency)")
     double getSumSqlFrequencyBySqlId(long slqId);
 }

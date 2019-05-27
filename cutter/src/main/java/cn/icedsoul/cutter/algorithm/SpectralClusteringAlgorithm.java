@@ -33,7 +33,7 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
 
     @Override
     public Map<Integer, List<Integer>> calculate() {
-//        preProcess();
+        preProcess();
         Map<Integer, List<Integer>> clusters = new HashMap<>();
 
         if(null == G || k > G.length) return clusters;

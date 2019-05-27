@@ -31,26 +31,27 @@ public class TableCutServiceImpl implements TableCutService {
     @Override
     public Map<Integer, List<String>> cutTable(int k) {
         generateGraph();
-        if(null != G){
-            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
-            clusters = cutGraphAlgorithm.calculate();
-            return translateClusters(clusters);
-        }
+        calculateAffinity();
+//        if(null != G){
+//            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
+//            clusters = cutGraphAlgorithm.calculate();
+//            return translateClusters(clusters);
+//        }
         return null;
     }
 
-    @Override
-    public Map<Integer, List<String>> communityDetection() {
-        generateGraph();
-        if(null != G){
-            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
-            clusters = cutGraphAlgorithm.calculate();
-            return translateClusters(clusters);
-        }
-        return null;
-    }
+//    @Override
+//    public Map<Integer, List<String>> communityDetection() {
+//        generateGraph();
+//        if(null != G){
+//            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+//            clusters = cutGraphAlgorithm.calculate();
+//            return translateClusters(clusters);
+//        }
+//        return null;
+//    }
 
-
+    //打印拆分List
     private Map<Integer, List<String>> translateClusters(Map<Integer, List<Integer>> clusters){
         System.out.println("----拆分结果：---");
         Map<Integer, List<String>> r = new HashMap<>();
@@ -68,6 +69,7 @@ public class TableCutServiceImpl implements TableCutService {
         return r;
     }
 
+    //生成邻接矩阵
     private void generateGraph(){
         tableList = (List)tableRepository.findAll();
         if(null != tableList){
@@ -91,10 +93,41 @@ public class TableCutServiceImpl implements TableCutService {
         }
     }
 
+    //table名称和id的对应map
     private void initTableMap(){
         tableMap.clear();
         for(int i = 0; i < tableSize; i++){
             tableMap.put(tableList.get(i).getId(), i);
         }
     }
+
+    //从邻接矩阵生成吸引度矩阵
+    //a对b的吸引度=ab边的权重/与b相连所有边的权重
+    private void calculateAffinity(){
+        for(int i = 0; i < tableSize; i++){
+            int sum = 0;
+            for(int j = 0; j < tableSize; j++){
+                sum += G[i][j];
+            }
+            if(sum > 0){
+                for(int j = 0; j < tableSize; j++){
+                    G[i][j] = G[i][j] / sum;
+                }
+            }
+        }
+        printG(G);
+    }
+
+    private void printG(double[][] G){
+        int n = G.length;
+        System.out.println("---吸引度矩阵------");
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n;j++){
+                System.out.print(G[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("----------------");
+    }
+
 }

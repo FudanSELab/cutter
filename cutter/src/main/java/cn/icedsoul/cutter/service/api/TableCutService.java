@@ -7,5 +7,5 @@ public interface TableCutService {
 
     Map<Integer, List<String>> cutTable(int k);
 
-    Map<Integer, List<String>> communityDetection();
+//    Map<Integer, List<String>> communityDetection();
 }
