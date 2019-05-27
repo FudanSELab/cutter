@@ -1,6 +1,5 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.algorithm.CommunityDetectionAlgorithm;
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
 import cn.icedsoul.cutter.domain.Table;
@@ -24,7 +23,9 @@ public class TableCutServiceImpl implements TableCutService {
     List<Table> tableList;
     int tableSize;
     double[][] G;
-    //从tableid到tableList中下标的映射
+    /**
+     * 从tableid到tableList中下标的映射
+     */
     Map<Long, Integer> tableMap = new HashMap<>();
     Map<Integer, List<Integer>> clusters;
 
@@ -42,11 +43,11 @@ public class TableCutServiceImpl implements TableCutService {
     @Override
     public Map<Integer, List<String>> communityDetection() {
         generateGraph();
-        if(null != G){
-            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
-            clusters = cutGraphAlgorithm.calculate();
-            return translateClusters(clusters);
-        }
+//        if(null != G){
+//            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+//            clusters = cutGraphAlgorithm.calculate();
+//            return translateClusters(clusters);
+//        }
         return null;
     }
 
@@ -76,9 +77,9 @@ public class TableCutServiceImpl implements TableCutService {
             initTableMap();
             G = new double[tableSize][tableSize];
             for(int i = 0; i < tableSize; i++){
-                List<CloseToRelation> CloseToRelationList = closeToRepository.findCloseTosOfNode(tableList.get(i).getId());
-                System.out.println("----"+CloseToRelationList);
-                for(CloseToRelation ctr: CloseToRelationList){
+                List<CloseToRelation> closetorelationlist = closeToRepository.findCloseTosOfNode(tableList.get(i).getId());
+                System.out.println("----"+closetorelationlist);
+                for(CloseToRelation ctr: closetorelationlist){
                     G[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
                     G[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
                 }

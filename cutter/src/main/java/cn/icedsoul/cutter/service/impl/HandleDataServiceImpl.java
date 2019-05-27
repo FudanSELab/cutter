@@ -104,8 +104,27 @@ public class HandleDataServiceImpl implements HandleDataService {
                 }
                 lastRelations = relationList;
             }
+            /**
+             * 让Method和Sql 存储table list
+             */
+            for(int i= levels.size() - 1; i > 0; i--){
+                List<BaseRelation> relationList = levelRelation.get(i);
+                for(BaseRelation relation: relationList){
+                    if(relation instanceof Contain){
+                        Contain contain = (Contain) relation;
+                        contain.getSql().addTable(contain.getTable());
+                    }
+                    else if(relation instanceof Execute){
+                        Execute execute = (Execute) relation;
+                        execute.getMethod().addTables(execute.getSql().getTables());
+                    }
+                    else if(relation instanceof MethodCall){
+                        MethodCall methodCall = (MethodCall) relation;
+                        methodCall.getMethod().addTables(methodCall.getCalledMethod().getTables());
+                    }
+                }
+            }
         }
-
     }
 
     private void handleSingleLine(String line){
@@ -178,12 +197,6 @@ public class HandleDataServiceImpl implements HandleDataService {
         return method;
     }
 
-    /**
-     * 处理方法调用关系时按照以下逻辑：
-     *  1. 若为当前trace第一条记录，则父节点为Entry，直接插入
-     *  2. 若当前trace已经有记录，则寻找到正确的位置进行插入，插入结点后调整树结构，使其保持正常
-     *
-     */
     private void handleMethodCall(Method method, Long startTime, Long endTime, BaseRelation baseRelation){
         MethodCall methodCall = new MethodCall(baseRelation);
         methodCall.setStartTime(startTime);
@@ -268,6 +281,7 @@ public class HandleDataServiceImpl implements HandleDataService {
             Execute parentExecute = (Execute) parent;
             childContain.setSql(parentExecute.getSql());
             containRepository.save(childContain);
+//            changeParentTables(parent, childContain.getTable());
         }
     }
 
