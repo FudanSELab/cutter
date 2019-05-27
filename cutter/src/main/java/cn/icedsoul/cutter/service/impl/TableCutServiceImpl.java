@@ -1,6 +1,5 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.algorithm.CommunityDetectionAlgorithm;
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
 import cn.icedsoul.cutter.domain.Table;
@@ -24,7 +23,9 @@ public class TableCutServiceImpl implements TableCutService {
     List<Table> tableList;
     int tableSize;
     double[][] G;
-    //从tableid到tableList中下标的映射
+    /**
+     * 从tableid到tableList中下标的映射
+     */
     Map<Long, Integer> tableMap = new HashMap<>();
     Map<Integer, List<Integer>> clusters;
 

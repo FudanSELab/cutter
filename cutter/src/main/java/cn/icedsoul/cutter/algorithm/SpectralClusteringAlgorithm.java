@@ -1,8 +1,5 @@
 package cn.icedsoul.cutter.algorithm;
 
-import cn.icedsoul.cutter.domain.Table;
-import smile.clustering.SpectralClustering;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,22 +30,23 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
 
     @Override
     public Map<Integer, List<Integer>> calculate() {
-        preProcess();
-        Map<Integer, List<Integer>> clusters = new HashMap<>();
-
-        if(null == G || k > G.length) return clusters;
-        printG(G);
-        SpectralClustering sc = new SpectralClustering(G, k);
-        for(int i = 0; i < sc.getNumClusters(); i ++){
-            clusters.put(i, new ArrayList<>());
-        }
-        int[] labels = sc.getClusterLabel();
-        for(int i = 0; i < labels.length; i++){
-            clusters.get(labels[i]).add(i);
-        }
-        System.out.println("----clusters:----");
-        System.out.println(clusters);
-        return clusters;
+//        preProcess();
+//        Map<Integer, List<Integer>> clusters = new HashMap<>();
+//
+//        if(null == G || k > G.length) return clusters;
+//        printG(G);
+//        SpectralClustering sc = new SpectralClustering(G, k);
+//        for(int i = 0; i < sc.getNumClusters(); i ++){
+//            clusters.put(i, new ArrayList<>());
+//        }
+//        int[] labels = sc.getClusterLabel();
+//        for(int i = 0; i < labels.length; i++){
+//            clusters.get(labels[i]).add(i);
+//        }
+//        System.out.println("----clusters:----");
+//        System.out.println(clusters);
+//        return clusters;
+        return new HashMap<>();
     }
 
 

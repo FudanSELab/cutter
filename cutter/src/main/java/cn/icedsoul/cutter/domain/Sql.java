@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +27,7 @@ public class Sql {
     private Long id;
     private String databaseName;
     private String sql;
+    private Set<Long> tables;
 
 //    @JsonIgnoreProperties("sql")
 //    @Relationship(type = "EXECUTE", direction = Relationship.INCOMING)
@@ -35,10 +35,13 @@ public class Sql {
 //
 //    @Relationship(type = "CONTAIN")
 //    private Set<Table> tables;
-
+    public void addTable(Table table){
+        this.tables.add(table.getId());
+    }
     public Sql(String databaseName, String sql){
         this.databaseName = databaseName;
         this.sql = sql;
+        this.tables = new HashSet<>();
 //        this.executes = new HashSet<>();
 //        this.tables = new HashSet<>();
     }

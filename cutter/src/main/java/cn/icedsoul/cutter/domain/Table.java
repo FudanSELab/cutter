@@ -40,39 +40,24 @@ public class Table{
         this.msd = 0;
     }
 
-//    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result
-//                + ((tableName == null) ? 0 : tableName.hashCode());
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        Table other = (Table) obj;
-//        if (databaseName == null) {
-//            if (other.databaseName != null) {
-//                return false;
-//            }
-//        } else if (!databaseName.equals(other.databaseName)) {
-//            return false;
-//        }
-//        if (tableName == null) {
-//            return other.tableName == null;
-//        } else {
-//            return tableName.equals(other.tableName);
-//        }
-//    }
+    @Override
+    public int hashCode() {
+        return this.id.hashCode() + this.databaseName.hashCode() + this.tableName.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Table other = (Table) obj;
+        return this.databaseName.equals(other.getDatabaseName()) && this.tableName.equals(other.getTableName());
+    }
 
 }

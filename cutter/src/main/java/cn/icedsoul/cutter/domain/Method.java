@@ -1,14 +1,10 @@
 package cn.icedsoul.cutter.domain;
 
-import cn.icedsoul.cutter.relation.MethodCall;
-import cn.icedsoul.cutter.relation.MethodContain;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +28,7 @@ public class Method {
     private String className;
     private String methodName;
     private List<String> params;
+    private Set<Long> tables;
 
 //    @JsonIgnoreProperties("method")
 //    @Relationship(type = "METHOD_CALL", direction = Relationship.INCOMING)
@@ -46,6 +43,9 @@ public class Method {
 //
 //    @Relationship(type = "EXECUTE")
 //    private Set<Sql> sql;
+    public void addTables(Set<Long> tables){
+        this.tables.addAll(tables);
+    }
 
     public Method(List<String> modifier, String returnType,  String packageName,  String className,String methodName, List<String> params){
         this.modifier = modifier;
@@ -54,6 +54,7 @@ public class Method {
         this.className = className;
         this.methodName = methodName;
         this.params = params;
+        this.tables = new HashSet<>();
 //        this.callMethods = new HashSet<>();
 //        this.methodContains = new HashSet<>();
 //        this.methods = new HashSet<>();
