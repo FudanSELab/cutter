@@ -97,6 +97,11 @@ public class CutterController {
     @ApiOperation(value = "split cost", notes = "split cost")
     public int[] splitCost(){
         List<List<String>> splitList = new ArrayList<>();
+//        splitList.add(Arrays.asList("sys_dict"));
+//        splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link",
+//                "sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu",
+//                "gen_table", "gen_scheme",
+//                "oa_notify", "sys_menu", "oa_notify_record", "sys_log", "cms_article_data", "cms_comment", "cms_guestbook" ));
         splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link"));
         splitList.add(Arrays.asList("sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu"));
         splitList.add(Arrays.asList("gen_table", "gen_scheme", "sys_dict"));

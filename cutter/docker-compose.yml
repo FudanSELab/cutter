@@ -1,0 +1,15 @@
+version: '3'
+services:
+
+  cutter:
+    build: .
+    image: fdse/cutter
+    restart: always
+    ports:
+      - 16318:16318
+    networks:
+      - docker-neo4j_cutter-network
+
+networks:
+  docker-neo4j_cutter-network:
+    external: true
