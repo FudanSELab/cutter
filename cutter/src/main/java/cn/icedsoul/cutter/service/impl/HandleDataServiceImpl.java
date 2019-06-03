@@ -141,14 +141,14 @@ public class HandleDataServiceImpl implements HandleDataService {
     }
 
     private void handleSingleLine(String line){
-        if(line.length() <= 0){
+        if (line.length() <= 0) {
             log.info("This line is blank!");
             return;
         }
         String[] lines = line.split(";");
-        if(DAT_START.equals(lines[0])){
+        if (DAT_START.equals(lines[0])) {
             ENTRY = methodRepository.findByPackageNameAndClassNameAndMethodName("", "", "Entry");
-            if(isNull(ENTRY)) {
+            if (isNull(ENTRY)) {
                 ENTRY = new Method();
                 ENTRY.setPackageName("");
                 ENTRY.setClassName("");
@@ -156,33 +156,32 @@ public class HandleDataServiceImpl implements HandleDataService {
                 ENTRY = methodRepository.save(ENTRY);
             }
             TMP_SQL = sqlRepository.findByDatabaseNameAndAndSql("Temp", "Temp");
-            if(isNull(TMP_SQL)){
+            if (isNull(TMP_SQL)) {
                 TMP_SQL = new Sql("Temp", "Temp");
                 TMP_SQL = sqlRepository.save(TMP_SQL);
             }
             ROOT = packageRepository.findByFullPackageName("Root");
-            if(isNull(ROOT)){
+            if (isNull(ROOT)) {
                 ROOT = new Package("Root", "Root");
                 ROOT = packageRepository.save(ROOT);
             }
             return;
         }
+        if(!DAT_NORMAL.equals(lines[0])){
+            return;
+        }
         BaseRelation baseRelation = new BaseRelation(Long.valueOf(lines[4]), lines[3], lines[10], lines[11],
                 Double.valueOf(lines[12]), lines[13], Integer.valueOf(lines[9]), Integer.valueOf(lines[8]));
-        if(NODE_TYPE_CLASS_FUNCTION.equals(lines[7])) {
+        if (NODE_TYPE_CLASS_FUNCTION.equals(lines[7])) {
             Method method = handleMethod(lines[2]);
             handleMethodCall(method, Long.valueOf(lines[5]), Long.valueOf(lines[6]), baseRelation);
-        }
-        else if(NODE_TYPE_SQL.equals(lines[7])) {
+        } else if (NODE_TYPE_SQL.equals(lines[7])) {
             handleExecuteSql(Long.valueOf(lines[1]), lines[2], baseRelation);
-        }
-        else if(NODE_TYPE_DATABASE_TABLE.equals(lines[7])) {
+        } else if (NODE_TYPE_DATABASE_TABLE.equals(lines[7])) {
             handleTable(lines[2], baseRelation);
-        }
-        else {
+        } else {
             log.info("Parse Error!");
         }
-
     }
 
     private Method handleMethod(String methodInfo) {
@@ -237,19 +236,24 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
         String[] content = dbAndTable.split(":", 2);
-        if("dual".equals(content[1]) || content[1].contains(".")){
-            return;
+        try {
+            if("dual".equals(content[1]) || content[1].contains(".")){
+                return;
+            }
+            Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
+            if(isNull(table)){
+                table = new Table(content[0], content[1].toLowerCase());
+                table = tableRepository.save(table);
+            }
+            Contain contain = new Contain(baseRelation);
+            contain.setSql(TMP_SQL);
+            contain.setTable(table);
+            relations.add(contain);
+            log.info("[NOTICE]: I'm handling Table.");
+        } catch (Exception e){
+            log.info(dbAndTable);
         }
-        Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
-        if(isNull(table)){
-            table = new Table(content[0], content[1].toLowerCase());
-            table = tableRepository.save(table);
-        }
-        Contain contain = new Contain(baseRelation);
-        contain.setSql(TMP_SQL);
-        contain.setTable(table);
-        relations.add(contain);
-        log.info("[NOTICE]: I'm handling Table.");
+
     }
 
     private void clearDatabase() {

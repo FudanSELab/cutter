@@ -43,7 +43,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         closeToRepository.deleteAll();
 
         addSameSqlWeight();
-        addSameTraceWeight();
+//        addSameTraceWeight();
 //        addSameScenarioWeight();
 //        addSameModuleWeight();
         System.out.println("!!!Finish adding weight!!!");
