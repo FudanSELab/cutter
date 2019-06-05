@@ -6,6 +6,7 @@ package cn.icedsoul.cutter.util;
  */
 public class CONSTANT {
     public static final String DAT_START = "$0";
+    public static final String DAT_NORMAL = "$1";
 
     public static final String NODE_TYPE_CLASS_FUNCTION = "CLASS-FUNCTION";
     public static final String NODE_TYPE_SQL = "SQL";

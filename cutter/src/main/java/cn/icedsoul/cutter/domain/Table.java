@@ -1,14 +1,11 @@
 package cn.icedsoul.cutter.domain;
 
-import cn.icedsoul.cutter.relation.Contain;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,11 +30,36 @@ public class Table{
     //module sharing degree
     private double msd;
 
+    private Set<Long> appearSql;
+    private Set<Long> appearTrace;
+    private Set<String> appearScenario;
+    private Set<String> appearModule;
+
     public Table(String databaseName, String tableName){
         this.databaseName = databaseName;
         this.tableName = tableName;
         this.ssd = 0;
         this.msd = 0;
+        this.appearSql = new HashSet<>();
+        this.appearTrace = new HashSet<>();
+        this.appearScenario = new HashSet<>();
+        this.appearModule = new HashSet<>();
+    }
+
+    public void addSql(Sql sql){
+        this.appearSql.add(sql.getId());
+    }
+
+    public void addTrace(Long traceId){
+        this.appearTrace.add(traceId);
+    }
+
+    public void addScenario(String scenarioId){
+        this.appearScenario.add(scenarioId);
+    }
+
+    public void addModule(String moduleId){
+        this.appearModule.add(moduleId);
     }
 
     @Override

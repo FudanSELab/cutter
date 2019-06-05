@@ -1,7 +1,5 @@
 package cn.icedsoul.cutter.controller;
 
-import cn.icedsoul.cutter.domain.Method;
-import cn.icedsoul.cutter.domain.Table;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.MethodRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
@@ -118,6 +116,13 @@ public class CutterController {
         System.out.println(idList);
 //        return null;
         return splitCostService.getSplitCost(idList);
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/testSplit")
+    @ApiOperation(value = "test split", notes = "test split")
+    public void testSplit(@RequestParam("k") int k){
+
     }
 
 }
