@@ -115,6 +115,9 @@ public class HandleDataServiceImpl implements HandleDataService {
                         Contain contain = (Contain) relation;
                         contain.getSql().addTable(contain.getTable());
                         sqlRepository.save(contain.getSql());
+                        Table table = contain.getTable();
+                        table.addSql(contain.getSql());
+                        tableRepository.save(table);
                     }
                     else if(relation instanceof Execute){
                         Execute execute = (Execute) relation;
@@ -243,21 +246,25 @@ public class HandleDataServiceImpl implements HandleDataService {
             Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
             if(isNull(table)){
                 table = new Table(content[0], content[1].toLowerCase());
-                table = tableRepository.save(table);
             }
+            table.addTrace(baseRelation.getTraceId());
+            table.addScenario(baseRelation.getScenarioId());
+            table.addModule(baseRelation.getModuleName());
+            table = tableRepository.save(table);
             Contain contain = new Contain(baseRelation);
             contain.setSql(TMP_SQL);
             contain.setTable(table);
             relations.add(contain);
             log.info("[NOTICE]: I'm handling Table.");
         } catch (Exception e){
-            log.info(dbAndTable);
+            log.info(e.getMessage());
         }
 
     }
 
     private void clearDatabase() {
-        methodRepository.clearDatabase();
+        methodRepository.clearRelation();
+        methodRepository.clearNode();
         log.info("[NOTICE]: Clear all data.");
     }
 
