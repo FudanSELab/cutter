@@ -62,11 +62,11 @@
             <!--<artifactId>smile-core</artifactId>-->
             <!--<version>1.5.2</version>-->
         <!--</dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>cn.dingding</groupId>-->
-<!--            <artifactId>smile-core</artifactId>-->
-<!--            <version>1.5.2</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>cn.dingding</groupId>
+            <artifactId>smile-core</artifactId>
+            <version>1.5.2</version>
+        </dependency>
 
         <!--Swagger-->
         <dependency>
@@ -86,6 +86,12 @@
             <artifactId>swagger-bootstrap-ui</artifactId>
             <version>1.9.3</version>
         </dependency>
+
+        <dependency>
+        <groupId>cn.dingding</groupId>
+        <artifactId>girvan-newman</artifactId>
+        <version>1.0</version>
+    </dependency>
 
     </dependencies>
 

@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter.algorithm;
+package cn.icedsoul.cutter.algorithm.communityDetection;
 
 public class Edge implements Cloneable{
     int v;     //v表示连接点的编号,w表示此边的权值  

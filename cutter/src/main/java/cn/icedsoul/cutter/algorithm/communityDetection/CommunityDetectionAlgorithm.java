@@ -1,4 +1,6 @@
-package cn.icedsoul.cutter.algorithm;
+package cn.icedsoul.cutter.algorithm.communityDetection;
+
+import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 
 import java.util.ArrayList;
 import java.util.HashMap;

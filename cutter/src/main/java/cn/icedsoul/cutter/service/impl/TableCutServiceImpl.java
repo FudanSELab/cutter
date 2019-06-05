@@ -1,7 +1,11 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
+import cn.icedsoul.cutter.algorithm.asymmetricKMeans.AsymmetricKMeansAlgorithm;
+import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
+import cn.icedsoul.cutter.algorithm.fastNewman.FastNewmanAlgothrim;
+import cn.icedsoul.cutter.algorithm.girvanNewman.GirvanNewmanAlgorithm;
+import cn.icedsoul.cutter.algorithm.markovChain.MCLClusteringAlgorithm;
 import cn.icedsoul.cutter.domain.Table;
 import cn.icedsoul.cutter.queryresult.CloseToRelation;
 import cn.icedsoul.cutter.repository.CloseToRepository;
@@ -23,6 +27,7 @@ public class TableCutServiceImpl implements TableCutService {
     List<Table> tableList;
     int tableSize;
     double[][] G;
+
     /**
      * 从tableid到tableList中下标的映射
      */
@@ -32,12 +37,17 @@ public class TableCutServiceImpl implements TableCutService {
     @Override
     public Map<Integer, List<String>> cutTable(int k) {
         generateGraph();
-        calculateAffinity();
-//        if(null != G){
+//        printG(G);
+//        calculateAffinity();
+        if(null != G){
 //            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
-//            clusters = cutGraphAlgorithm.calculate();
-//            return translateClusters(clusters);
-//        }
+//            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
+//            CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
+//            CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
+            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
+            clusters = cutGraphAlgorithm.calculate();
+            return translateClusters(clusters);
+        }
         return null;
     }
 
@@ -73,6 +83,7 @@ public class TableCutServiceImpl implements TableCutService {
     //生成邻接矩阵
     private void generateGraph(){
         tableList = (List)tableRepository.findAll();
+        printTableList();
         if(null != tableList){
             tableSize = tableList.size();
             //初始化从tableid到tableList中下标的映射
@@ -123,12 +134,20 @@ public class TableCutServiceImpl implements TableCutService {
         int n = G.length;
         System.out.println("---吸引度矩阵------");
         for(int i = 0; i < n; i++){
+            System.out.print("{ ");
             for(int j = 0; j < n;j++){
-                System.out.print(G[i][j] + " ");
+                if(j != n-1) System.out.print(G[i][j] + ", ");
+                else System.out.print(G[i][j]);
             }
-            System.out.println();
+            System.out.println(" },");
         }
         System.out.println("----------------");
+    }
+
+    private void printTableList(){
+        for(int i = 0; i < tableList.size(); i++){
+            System.out.println(i+": " + tableList.get(i).getTableName());
+        }
     }
 
 }
