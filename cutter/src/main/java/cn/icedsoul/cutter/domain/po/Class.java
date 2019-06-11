@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter.domain;
+package cn.icedsoul.cutter.domain.po;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

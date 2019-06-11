@@ -1,7 +1,7 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.domain.Sql;
-import cn.icedsoul.cutter.domain.Table;
+import cn.icedsoul.cutter.domain.po.Sql;
+import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.relation.CloseTo;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.WeightCalculationService;

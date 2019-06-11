@@ -1,6 +1,6 @@
 package cn.icedsoul.cutter.repository;
 
-import cn.icedsoul.cutter.queryresult.CloseToRelation;
+import cn.icedsoul.cutter.domain.dto.CloseToRelation;
 import cn.icedsoul.cutter.relation.CloseTo;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;

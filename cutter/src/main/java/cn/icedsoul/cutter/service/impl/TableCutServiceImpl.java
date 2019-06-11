@@ -1,9 +1,7 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
-import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
-import cn.icedsoul.cutter.domain.Table;
-import cn.icedsoul.cutter.queryresult.CloseToRelation;
+import cn.icedsoul.cutter.domain.po.Table;
+import cn.icedsoul.cutter.domain.dto.CloseToRelation;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
 import cn.icedsoul.cutter.service.api.TableCutService;

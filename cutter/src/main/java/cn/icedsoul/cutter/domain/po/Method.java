@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter.domain;
+package cn.icedsoul.cutter.domain.po;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +8,7 @@ import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -43,6 +44,7 @@ public class Method {
 //
 //    @Relationship(type = "EXECUTE")
 //    private Set<Sql> sql;
+
     public void addTables(Set<Long> tables){
         this.tables.addAll(tables);
     }
@@ -59,5 +61,23 @@ public class Method {
 //        this.methodContains = new HashSet<>();
 //        this.methods = new HashSet<>();
 //        this.sql = new HashSet<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Method method = (Method) o;
+        return Objects.equals(modifier, method.modifier) &&
+                Objects.equals(returnType, method.returnType) &&
+                Objects.equals(packageName, method.packageName) &&
+                Objects.equals(className, method.className) &&
+                Objects.equals(methodName, method.methodName) &&
+                Objects.equals(params, method.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(modifier, returnType, packageName, className, methodName, params);
     }
 }

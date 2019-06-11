@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter.queryresult;
+package cn.icedsoul.cutter.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,8 +1,5 @@
-package cn.icedsoul.cutter.domain;
+package cn.icedsoul.cutter.domain.po;
 
-import cn.icedsoul.cutter.relation.Contain;
-import cn.icedsoul.cutter.relation.Execute;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +8,7 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -44,5 +42,19 @@ public class Sql {
         this.tables = new HashSet<>();
 //        this.executes = new HashSet<>();
 //        this.tables = new HashSet<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Sql sql1 = (Sql) o;
+        return Objects.equals(databaseName, sql1.databaseName) &&
+                Objects.equals(sql, sql1.sql);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(databaseName, sql);
     }
 }

@@ -1,6 +1,6 @@
 package cn.icedsoul.cutter.repository;
 
-import cn.icedsoul.cutter.domain.Method;
+import cn.icedsoul.cutter.domain.po.Method;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;

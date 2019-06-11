@@ -1,6 +1,6 @@
 package cn.icedsoul.cutter.relation;
 
-import cn.icedsoul.cutter.domain.Package;
+import cn.icedsoul.cutter.domain.po.Package;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

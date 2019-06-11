@@ -1,5 +1,6 @@
-package cn.icedsoul.cutter.domain;
+package cn.icedsoul.cutter.domain.po;
 
+import cn.icedsoul.cutter.util.CONSTANT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,11 +56,15 @@ public class Table{
     }
 
     public void addScenario(String scenarioId){
-        this.appearScenario.add(scenarioId);
+        if(!scenarioId.equals(CONSTANT.NO_SCENARIO_NAME)) {
+            this.appearScenario.add(scenarioId);
+        }
     }
 
     public void addModule(String moduleId){
-        this.appearModule.add(moduleId);
+        if(!moduleId.equals(CONSTANT.NO_MODULE_NAME)) {
+            this.appearModule.add(moduleId);
+        }
     }
 
     @Override

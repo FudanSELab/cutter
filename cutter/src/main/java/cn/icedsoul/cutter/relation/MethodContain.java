@@ -1,7 +1,7 @@
 package cn.icedsoul.cutter.relation;
 
-import cn.icedsoul.cutter.domain.Class;
-import cn.icedsoul.cutter.domain.Method;
+import cn.icedsoul.cutter.domain.po.Class;
+import cn.icedsoul.cutter.domain.po.Method;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
