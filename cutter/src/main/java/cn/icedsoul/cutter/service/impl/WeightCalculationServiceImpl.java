@@ -43,8 +43,8 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         closeToRepository.deleteAll();
 
         addSameSqlWeight();
-//        addSameTraceWeight();
-//        addSameScenarioWeight();
+        addSameTraceWeight();
+        addSameScenarioWeight();
 //        addSameModuleWeight();
         System.out.println("!!!Finish adding weight!!!");
     }
@@ -196,21 +196,50 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
     private double getUpdatedWeight(double weight, double frequency, int level){
+//        if(frequency <= 0) {
+//            switch(level){
+//                case SQL_LEVEL:{
+//                    return weight + 1;
+//                }
+//                case TRACE_LEVEL:{
+//                    return weight + 0.1;
+//                }
+//            }
+//        }
+//        switch(level){
+//            case SQL_LEVEL:{
+//                return weight + 10*frequency + 100;
+//            }
+//            case TRACE_LEVEL:{
+//                return weight + 5*frequency + 50;
+//            }
+//            case SCENARIO_LEVEL:{
+//                return weight + 2*frequency + 10;
+//            }
+//            case PACKAGE_LEVEL:{
+//                return weight + 5;
+//            }
+//            case MODULE_LEVEL:{
+//                return weight + 1 * frequency + 5;
+//            }
+//            default: return -1;
+//        }
+
         switch(level){
             case SQL_LEVEL:{
-                return weight + 10*frequency + 100;
+                return weight + 100;
             }
             case TRACE_LEVEL:{
-                return weight + 5*frequency + 50;
+                return weight + 50;
             }
             case SCENARIO_LEVEL:{
-                return weight + 2*frequency + 10;
+                return weight + 10;
             }
             case PACKAGE_LEVEL:{
                 return weight + 5;
             }
             case MODULE_LEVEL:{
-                return weight + 0.1 * frequency + 5;
+                return weight + 5;
             }
             default: return -1;
         }

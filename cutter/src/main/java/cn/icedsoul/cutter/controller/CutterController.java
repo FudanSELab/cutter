@@ -1,5 +1,6 @@
 package cn.icedsoul.cutter.controller;
 
+import cn.icedsoul.cutter.domain.bo.ShareTable;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.MethodRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
@@ -119,10 +120,10 @@ public class CutterController {
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping(value = "/testSplit")
-    @ApiOperation(value = "test split", notes = "test split")
-    public void testSplit(@RequestParam("k") int k){
-
+    @PostMapping(value = "/share")
+    @ApiOperation(value = "share", notes = "share")
+    public List<Set<ShareTable>> calShare(@RequestParam("k") int k){
+        return sharingDegreeService.shareCalculate(k);
     }
 
 }
