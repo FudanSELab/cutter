@@ -1,8 +1,6 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.domain.bo.Request;
-import cn.icedsoul.cutter.domain.bo.ShareTable;
-import cn.icedsoul.cutter.domain.bo.TraceType;
+import cn.icedsoul.cutter.domain.bo.*;
 import cn.icedsoul.cutter.domain.po.Method;
 import cn.icedsoul.cutter.domain.po.Sql;
 import cn.icedsoul.cutter.domain.po.Table;
@@ -108,8 +106,8 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         int finalSqlNumber = sqlNumber;
         tables.forEach(table -> {
             int appearSql = 0;
-            for(Long tableId : table.getAppearSql()){
-                Sql sql = sqlRepository.findById(tableId).get();
+            for(Long sqlId : table.getAppearSql()){
+                Sql sql = sqlRepository.findById(sqlId).get();
                 if(sql.getTables().size() > 1){
                     appearSql += 1;
                 }
@@ -121,7 +119,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
 
             Set<Method> appearRequest = new HashSet<>();
             Set<TraceType> appearTraceType = new HashSet<>();
-            for(Long traceId : table.getAppearTrace()) {
+            for(Long traceId: table.getAppearTrace()) {
                 for (Request request : requests.values()) {
                     if (request.containTrace(traceId)) {
                         appearRequest.add(request.getEntry());
@@ -151,11 +149,6 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
             log.info(table.getTableName() + " 出现在 " + table.getAppearSql().size() + "个 SQL， " + table.getAppearTrace().size() + "个 Trace, "
             + appearRequestNum + "个 Request, " + appearTraceTypeNum + "个 RequestNum， " + table.getAppearScenario().size() + " 个Scenario， "
             + table.getAppearModule().size() + "个 Module");
-
-//            result.put(table.getTableName(), "Sql : " + format(sqlShare * 100) + "% , Trace : " + format(traceShare * 100) + "%, cTrace : " + format(cTraceShare * 100)
-//                    + "%, Scenario : " + format(scenarioShare * 100) + "%, Module : " + format(moduleShare * 100)
-//                    + "%, Request : " + format(requestShare * 100) + "%, TraceType : " + format(traceTypeShare * 100)
-//                    + "%, cRequest : " + format(cRequestShare * 100) + "%, cTraceType : " + format(cTraceTypeShare * 100) + "%");
         });
         Collections.sort(shareTables);
         for(ShareTable shareTable : shareTables){
@@ -203,14 +196,14 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
 
     private boolean similar(Table a, Table b){
         int aSqlNum = 0, bSqlNum = 0, abSqlNum = 0;
-        for(Long tableId : a.getAppearSql()){
-            Sql sql = sqlRepository.findById(tableId).get();
+        for(Long sqlId : a.getAppearSql()){
+            Sql sql = sqlRepository.findById(sqlId).get();
             if(sql.getTables().size() > 1){
                 aSqlNum += 1;
             }
         }
-        for(Long tableId : b.getAppearSql()){
-            Sql sql = sqlRepository.findById(tableId).get();
+        for(Long sqlId: b.getAppearSql()){
+            Sql sql = sqlRepository.findById(sqlId).get();
             if(sql.getTables().size() > 1){
                 bSqlNum += 1;
             }
@@ -252,10 +245,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         log.info(a.getTableName() + " " + b.getTableName() + ": " + aToBSqlSimilar + " " + bToASqlSimilar + " " + aToBTraceSimilar + " " + bToATraceSimilar);
         //TODO 优化
         boolean isSimilar = (aToBSqlSimilar >= 0.8 || bToASqlSimilar >= 0.8) && (aToBTraceSimilar >= 0.8 || bToATraceSimilar >= 0.8);
-        if(isSimilar){
-            return true;
-        }
-        return false;
+        return isSimilar;
     }
 
 
