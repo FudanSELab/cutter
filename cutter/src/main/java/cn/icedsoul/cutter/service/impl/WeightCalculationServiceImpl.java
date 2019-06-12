@@ -5,14 +5,20 @@ import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.relation.CloseTo;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.WeightCalculationService;
+import com.google.common.collect.Lists;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static cn.icedsoul.cutter.util.Common.*;
+
 @Service
+@Log
 public class WeightCalculationServiceImpl implements WeightCalculationService {
 
     @Autowired
@@ -47,6 +53,72 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         addSameScenarioWeight();
 //        addSameModuleWeight();
         System.out.println("!!!Finish adding weight!!!");
+    }
+
+    @Override
+    public void addSimilarWeight() {
+        List<Table> tables = Lists.newArrayList(tableRepository.findAll());
+        double[][] sqlWeightGraph = new double[100][100];
+        double[][] traceWeightGraph = new double[100][100];
+        double[][] scenarioWeightGraph = new double[100][100];
+
+        for (int i = 0; i < tables.size(); i++){
+            for (int j = 0; j < tables.size(); j++){
+                List<Double> result = calculateSimilar(tables.get(i), tables.get(j));
+                sqlWeightGraph[i][j] = result.get(0);
+                traceWeightGraph[i][j] = result.get(1);
+                scenarioWeightGraph[i][j] = result.get(2);
+            }
+        }
+    }
+
+    private List<Double> calculateSimilar(Table a, Table b){
+        double aSqlNum = 0, bSqlNum = 0, abSqlNum = 0;
+        for(Long aSqlId : a.getAppearSql()){
+            for(Long bSqlId : b.getAppearSql()){
+                if(aSqlId.equals(bSqlId)){
+                    abSqlNum += sqlWeight.get(aSqlId);
+                }
+                if(aSqlNum == 0) {
+                    bSqlNum += sqlWeight.get(bSqlId);
+                }
+            }
+            aSqlNum += sqlWeight.get(aSqlId);
+        }
+
+        double aTraceNum = 0, bTraceNum = 0, abTraceNum = 0;
+        for(Long aTraceId : a.getAppearTrace()){
+            for(Long bTraceId : b.getAppearTrace()){
+                if(aTraceId.equals(bTraceId)){
+                    abTraceNum += traceWeight.get(aTraceId);
+                }
+                if(aTraceNum == 0){
+                    bTraceNum += traceWeight.get(bTraceId);
+                }
+            }
+            aTraceNum += traceWeight.get(aTraceId);
+        }
+        double aScenarioNum = 0, bScenarioNum = 0, abScenarioNum = 0;
+        for(String aScenarioId : a.getAppearScenario()){
+            for(String bScenarioId : b.getAppearScenario()){
+                if(aScenarioId.equals(bScenarioId)){
+                    abScenarioNum += scenarioWeight.get(aScenarioId);
+                }
+                if(aScenarioNum == 0){
+                    bScenarioNum += scenarioWeight.get(bScenarioId);
+                }
+            }
+            aScenarioNum += scenarioWeight.get(aScenarioId);
+        }
+        double sqlSimilar = abSqlNum / (aSqlNum + bSqlNum - abSqlNum);
+        double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
+        double scenarioSimilar = abScenarioNum / (aScenarioNum + bScenarioNum - abScenarioNum);
+        List<Double> result = new ArrayList<>();
+        log.info(String.format("%s %s : %.2f        %.2f         %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
+        result.add(sqlSimilar);
+        result.add(traceSimilar);
+        result.add(scenarioSimilar);
+        return result;
     }
 
     @Override
@@ -284,5 +356,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 //            default: return -1;
 //        }
     }
+
+
 
 }

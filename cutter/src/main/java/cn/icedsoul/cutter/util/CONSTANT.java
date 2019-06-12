@@ -14,4 +14,5 @@ public class CONSTANT {
 
     public static final String NO_MODULE_NAME = "<no-module-name>";
     public static final String NO_SCENARIO_NAME = "<no-scenario-name>";
+    public static final String NO_SCENARIO_ID = "<no-scenario-id>";
 }

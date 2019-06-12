@@ -14,4 +14,6 @@ public interface WeightCalculationService {
 
     void addWeight();
 
+    void addSimilarWeight();
+
 }
