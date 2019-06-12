@@ -242,13 +242,14 @@ public class HandleDataServiceImpl implements HandleDataService {
         log.info("[NOTICE]: I'm handling MethodCall.");
     }
 
-    private void handleExecuteSql(Long executeTime, String dbAndsql, BaseRelation baseRelation){
-        String[] content = dbAndsql.split(":", 2);
+    private void handleExecuteSql(Long executeTime, String dbAndSql, BaseRelation baseRelation){
+        String[] content = dbAndSql.split(":", 2);
         Sql sql = sqlRepository.findByDatabaseNameAndAndSql(content[0], content[1]);
         if(isNull(sql)){
             sql = new Sql(content[0], content[1]);
             sql = sqlRepository.save(sql);
         }
+        addSqlWeight(sql, baseRelation);
         Execute execute = new Execute(baseRelation);
         execute.setMethod(ENTRY);
         execute.setSql(sql);
@@ -267,6 +268,8 @@ public class HandleDataServiceImpl implements HandleDataService {
             if(isNull(table)){
                 table = new Table(content[0], content[1].toLowerCase());
             }
+            addTraceWeight(baseRelation);
+            addScenarioWeight(baseRelation);
             table.addTrace(baseRelation.getTraceId());
             table.addScenario(baseRelation.getScenarioId());
             table.addModule(baseRelation.getModuleName());
