@@ -1,10 +1,11 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.domain.Class;
-import cn.icedsoul.cutter.domain.Method;
-import cn.icedsoul.cutter.domain.Package;
-import cn.icedsoul.cutter.domain.Sql;
-import cn.icedsoul.cutter.domain.Table;
+import cn.icedsoul.cutter.domain.bo.Request;
+import cn.icedsoul.cutter.domain.po.Class;
+import cn.icedsoul.cutter.domain.po.Method;
+import cn.icedsoul.cutter.domain.po.Package;
+import cn.icedsoul.cutter.domain.po.Sql;
+import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.relation.*;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.HandleDataService;
@@ -63,7 +64,6 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     @Autowired
     MethodContainRepository methodContainRepository;
-
 
     private List<BaseRelation> relations = new ArrayList<>();
 
@@ -131,9 +131,29 @@ public class HandleDataServiceImpl implements HandleDataService {
                     }
                 }
             }
+            handleTrace(relations);
         }
         handleClassTable();
     }
+
+    private void handleTrace(List<BaseRelation> relations){
+        Collections.sort(relations);
+
+        MethodCall methodCall = (MethodCall) relations.get(0);
+        Method entry = methodCall.getCalledMethod();
+        if(requests.containsKey(entry)){
+            requests.get(entry).addTrace(relations);
+        }
+        else {
+            Request request = new Request();
+            request.setEntry(methodCall.getCalledMethod());
+            request.addTrace(relations);
+            requests.put(entry, request);
+        }
+
+
+    }
+
 
     private void handleClassTable() {
         Iterable<MethodContain> methodContains = methodContainRepository.findAll();

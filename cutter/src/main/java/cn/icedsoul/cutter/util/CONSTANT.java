@@ -11,4 +11,7 @@ public class CONSTANT {
     public static final String NODE_TYPE_CLASS_FUNCTION = "CLASS-FUNCTION";
     public static final String NODE_TYPE_SQL = "SQL";
     public static final String NODE_TYPE_DATABASE_TABLE = "DATABASE-TABLE";
+
+    public static final String NO_MODULE_NAME = "<no-module-name>";
+    public static final String NO_SCENARIO_NAME = "<no-scenario-name>";
 }

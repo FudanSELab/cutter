@@ -1,4 +1,4 @@
-package cn.icedsoul.cutter.domain;
+package cn.icedsoul.cutter.domain.po;
 
 import cn.icedsoul.cutter.relation.PackageContain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

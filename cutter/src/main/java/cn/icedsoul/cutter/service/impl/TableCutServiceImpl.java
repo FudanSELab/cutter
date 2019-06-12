@@ -1,13 +1,10 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
-import cn.icedsoul.cutter.algorithm.asymmetricKMeans.AsymmetricKMeansAlgorithm;
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
-import cn.icedsoul.cutter.algorithm.fastNewman.FastNewmanAlgothrim;
+import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
 import cn.icedsoul.cutter.algorithm.girvanNewman.GirvanNewmanAlgorithm;
-import cn.icedsoul.cutter.algorithm.markovChain.MCLClusteringAlgorithm;
-import cn.icedsoul.cutter.domain.Table;
-import cn.icedsoul.cutter.queryresult.CloseToRelation;
+import cn.icedsoul.cutter.domain.po.Table;
+import cn.icedsoul.cutter.domain.dto.CloseToRelation;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
 import cn.icedsoul.cutter.service.api.TableCutService;
@@ -49,16 +46,16 @@ public class TableCutServiceImpl implements TableCutService {
 //        changeG(G);
 //        printG(G);
 //        calculateAffinity();
-//        if(null != G){
+        if(null != G){
 //            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
-////            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
-////            CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
-////            CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
-////            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
-////            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
-//            clusters = cutGraphAlgorithm.calculate();
-//            return translateClusters(clusters);
-//        }
+//            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
+//            CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
+//            CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
+//            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
+            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+            clusters = cutGraphAlgorithm.calculate();
+            return translateClusters(clusters);
+        }
         return null;
     }
 
@@ -113,7 +110,7 @@ public class TableCutServiceImpl implements TableCutService {
         G = new double[tableSize][tableSize];
         for(int i = 0; i < tableSize; i++){
             for(int j = 0; j < tableSize; j++){
-
+                G[i][j] = G1[i][j] + G2[i][j] + G3[i][j];
             }
         }
     }

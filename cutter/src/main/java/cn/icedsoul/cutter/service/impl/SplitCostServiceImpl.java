@@ -1,9 +1,9 @@
 package cn.icedsoul.cutter.service.impl;
 
-import cn.icedsoul.cutter.domain.Method;
-import cn.icedsoul.cutter.domain.Sql;
-import cn.icedsoul.cutter.domain.Table;
-import cn.icedsoul.cutter.domain.Class;
+import cn.icedsoul.cutter.domain.po.Method;
+import cn.icedsoul.cutter.domain.po.Sql;
+import cn.icedsoul.cutter.domain.po.Table;
+import cn.icedsoul.cutter.domain.po.Class;
 import cn.icedsoul.cutter.repository.ClassRepository;
 import cn.icedsoul.cutter.repository.MethodRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
