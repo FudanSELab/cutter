@@ -73,7 +73,7 @@ public class Common {
             scenarioWeight.put(baseRelation.getScenarioId(), scenarioWeight.get(baseRelation.getScenarioId()) + baseRelation.getScenarioFrequency());
         }
         else {
-            scenarioWeight.put(baseRelation.getScenarioId(), scenarioWeight.get(baseRelation.getScenarioId()));
+            scenarioWeight.put(baseRelation.getScenarioId(), baseRelation.getScenarioFrequency());
         }
     }
 

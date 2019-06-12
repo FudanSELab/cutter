@@ -9,6 +9,7 @@ import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.relation.*;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.HandleDataService;
+import cn.icedsoul.cutter.util.CONSTANT;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -260,7 +261,7 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
         String[] content = dbAndTable.split(":", 2);
-        try {
+//        try {
             if("dual".equals(content[1]) || content[1].contains(".")){
                 return;
             }
@@ -269,9 +270,12 @@ public class HandleDataServiceImpl implements HandleDataService {
                 table = new Table(content[0], content[1].toLowerCase());
             }
             addTraceWeight(baseRelation);
-            addScenarioWeight(baseRelation);
             table.addTrace(baseRelation.getTraceId());
-            table.addScenario(baseRelation.getScenarioId());
+            if(!baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_NAME) && !baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_ID)) {
+                log.info(dbAndTable + " " + baseRelation.getScenarioId() + " " + baseRelation.getScenarioFrequency());
+                addScenarioWeight(baseRelation);
+                table.addScenario(baseRelation.getScenarioId());
+            }
             table.addModule(baseRelation.getModuleName());
             table = tableRepository.save(table);
             Contain contain = new Contain(baseRelation);
@@ -279,9 +283,9 @@ public class HandleDataServiceImpl implements HandleDataService {
             contain.setTable(table);
             relations.add(contain);
             log.info("[NOTICE]: I'm handling Table.");
-        } catch (Exception e){
-            log.info(e.getMessage());
-        }
+//        } catch (Exception e){
+//            log.info(e.getMessage());
+//        }
 
     }
 

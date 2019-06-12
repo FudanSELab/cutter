@@ -56,9 +56,7 @@ public class Table{
     }
 
     public void addScenario(String scenarioId){
-        if(!scenarioId.equals(CONSTANT.NO_SCENARIO_NAME) && !scenarioId.equals(CONSTANT.NO_SCENARIO_ID)) {
-            this.appearScenario.add(scenarioId);
-        }
+        this.appearScenario.add(scenarioId);
     }
 
     public void addModule(String moduleId){
