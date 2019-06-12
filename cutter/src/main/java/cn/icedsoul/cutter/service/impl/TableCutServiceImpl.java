@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.service.impl;
 
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
+import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
 import cn.icedsoul.cutter.algorithm.girvanNewman.GirvanNewmanAlgorithm;
 import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.domain.dto.CloseToRelation;
@@ -23,6 +24,9 @@ public class TableCutServiceImpl implements TableCutService {
     List<Table> tableList;
     int tableSize;
     double[][] G;
+    //分级的矩阵
+    double[][] G1, G2, G3;
+
     /**
      * 从tableid到tableList中下标的映射
      */
@@ -31,7 +35,15 @@ public class TableCutServiceImpl implements TableCutService {
 
     @Override
     public Map<Integer, List<String>> cutTable(int k) {
-        generateGraph();
+        generateGraph2();
+        normalize();
+        printG(G1);
+        printG(G2);
+        printG(G3);
+
+
+//        generateGraph();
+//        changeG(G);
 //        printG(G);
 //        calculateAffinity();
         if(null != G){
@@ -39,12 +51,14 @@ public class TableCutServiceImpl implements TableCutService {
 //            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
 //            CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
 //            CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
-            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
+//            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
+            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
             clusters = cutGraphAlgorithm.calculate();
             return translateClusters(clusters);
         }
         return null;
     }
+
 
 //    @Override
 //    public Map<Integer, List<String>> communityDetection() {
@@ -75,6 +89,68 @@ public class TableCutServiceImpl implements TableCutService {
         return r;
     }
 
+
+    private void normalize(){
+        for(int i = 0; i < tableSize; i ++){
+            double rowSum1 = 0, rowSum2 = 0, rowSum3 = 0;
+            for(int j = 0; j < tableSize; j++){
+                rowSum1 += G1[i][j] * G1[i][j];
+                rowSum2 += G2[i][j] * G2[i][j];
+                rowSum3 += G3[i][j] * G3[i][j];
+            }
+            rowSum1 = Math.sqrt(rowSum1);
+            rowSum2 = Math.sqrt(rowSum2);
+            rowSum3 = Math.sqrt(rowSum3);
+            for(int j = 0; j < tableSize; j++){
+                G1[i][j] /= rowSum1;
+                G2[i][j] /= rowSum2;
+                G3[i][j] /= rowSum3;
+            }
+        }
+        G = new double[tableSize][tableSize];
+        for(int i = 0; i < tableSize; i++){
+            for(int j = 0; j < tableSize; j++){
+                G[i][j] = G1[i][j] + G2[i][j] + G3[i][j];
+            }
+        }
+    }
+
+    //生成邻接矩阵,三个level三个矩阵
+    private void generateGraph2(){
+        tableList = (List)tableRepository.findAll();
+//        printTableList();
+        if(null != tableList){
+            tableSize = tableList.size();
+            //初始化从tableid到tableList中下标的映射
+            initTableMap();
+            G1 = new double[tableSize][tableSize];
+            G2 = new double[tableSize][tableSize];
+            G3 = new double[tableSize][tableSize];
+            for(int i = 0; i < tableSize; i++){
+                List<CloseToRelation> CloseToRelationList = closeToRepository.findCloseTosOfNode(tableList.get(i).getId());
+//                System.out.println("----"+CloseToRelationList);
+                for(CloseToRelation ctr: CloseToRelationList){
+                    if(ctr.getLevel() == 1){
+                        G1[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
+                        G1[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
+                    } else if(ctr.getLevel() == 2){
+                        G2[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
+                        G2[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
+                    } else if(ctr.getLevel() == 3){
+                        G3[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
+                        G3[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
+                    }
+
+                }
+            }
+//            for(int i = 0; i < tableSize; i++){
+//                for(int j = 0; j < i; j++){
+//                    G[i][j] = G[j][i];
+//                }
+//            }
+        }
+    }
+
     //生成邻接矩阵
     private void generateGraph(){
         tableList = (List)tableRepository.findAll();
@@ -92,15 +168,15 @@ public class TableCutServiceImpl implements TableCutService {
                     G[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
                 }
             }
-            for(int i = 0; i < tableSize; i++){
-                for(int j = 0; j < i; j++){
-                    G[i][j] = G[j][i];
-                }
-            }
+//            for(int i = 0; i < tableSize; i++){
+//                for(int j = 0; j < i; j++){
+//                    G[i][j] = G[j][i];
+//                }
+//            }
         }
     }
 
-    //table名称和id的对应map
+    //table的id和在矩阵中的index的对应map
     private void initTableMap(){
         tableMap.clear();
         for(int i = 0; i < tableSize; i++){
@@ -127,7 +203,6 @@ public class TableCutServiceImpl implements TableCutService {
 
     private void printG(double[][] G){
         int n = G.length;
-        System.out.println("---吸引度矩阵------");
         for(int i = 0; i < n; i++){
             System.out.print("{ ");
             for(int j = 0; j < n;j++){

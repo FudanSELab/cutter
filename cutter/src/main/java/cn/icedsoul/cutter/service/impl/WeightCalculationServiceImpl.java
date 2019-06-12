@@ -131,14 +131,14 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 //            System.out.println("---sql:"+sql.toString());
             //获取所有调用这条sql的方法的总的调用频率
             double sqlFrequency = sqlRepository.getSumSqlFrequencyBySqlId(sql.getId());
-            System.out.println("---sqlId="+sql.getId() + " sqlFrequency=" + sqlFrequency);
+//            System.out.println("---sqlId="+sql.getId() + " sqlFrequency=" + sqlFrequency);
             if(sqlFrequency > 0){
                 //查询这条sql操作的所有table，两两之间连条边
                 List<Table> tables = tableRepository.findTablesBySql(sql.getDatabaseName(), sql.getSql());
-                System.out.println(tables.toString());
-                checkAndSetWeight(tables, SQL_LEVEL, sqlFrequency);
+                checkAndSetWeight2(tables, SQL_LEVEL, sqlFrequency);
             }
         }
+        System.out.println("Finish adding same sql weight");
     }
 
     @Override
@@ -156,15 +156,16 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                         break;
                     }
                     double traceFrequency = tl.get(0);
-                    System.out.println("---traceId="+traceId +" ---traceFrequency=" + traceFrequency);
+//                    System.out.println("---traceId="+traceId +" ---traceFrequency=" + traceFrequency);
                     if(traceFrequency > 0){
                         //获取一条trace中的所有table，两两之间连条边
                         List<Table> tables = tableRepository.findTablesOfSameTrace(traceId);
-                        checkAndSetWeight(tables, TRACE_LEVEL, traceFrequency);
+                        checkAndSetWeight2(tables, TRACE_LEVEL, traceFrequency);
                     }
                 }
             }
         }
+        System.out.println("Finish adding same trace weight");
     }
 
 
@@ -184,15 +185,16 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                         break;
                     }
                     double scenarioFrequency = fl.get(0);
-                    System.out.println("======scenarioId="+scenarioId + "==scenarioFrequency=" + scenarioFrequency);
+//                    System.out.println("======scenarioId="+scenarioId + "==scenarioFrequency=" + scenarioFrequency);
                     if(scenarioFrequency > 0){
                         //获取一个场景中涉及到的所有table，两两之间连条边
                         List<Table> tables = tableRepository.findTablesOfSameScenario(scenarioId);
-                        checkAndSetWeight(tables, SCENARIO_LEVEL, scenarioFrequency);
+                        checkAndSetWeight2(tables, SCENARIO_LEVEL, scenarioFrequency);
                     }
                 }
             }
         }
+        System.out.println("Finish adding same scenario weight");
     }
 
     @Override
@@ -229,7 +231,35 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         checkAndSetWeight(tables, PACKAGE_LEVEL, 0);
     }
 
+    //每级都连边
+    private void checkAndSetWeight2(List<Table> tables, int level, double frequency){
+        if(tables != null){
+            for(int i = 0; i < tables.size(); i++) {
+                for (int j = i + 1; j < tables.size(); j++) {
+                    List<Double> closeToList = closeToRepository.findCloseToByStartTableAndEndTableAndLevel(
+                            tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                            tables.get(j).getDatabaseName(), tables.get(j).getTableName(), level);
+                    if(null == closeToList || closeToList.size() == 0){
+                        CloseTo closeTo = new CloseTo();
+                        closeTo.setStartTable(tables.get(i));
+                        closeTo.setEndTable(tables.get(j));
+                        closeTo.setLevel(level);
+                        closeTo.setWeight(getUpdatedWeight(0, frequency, level));
+                        closeToRepository.save(closeTo);
+                    } else if(closeToList.size() > 1){
+                        System.out.println("!!!!!!Error: Two tables has more than one edge at one level!!!!!!!");
+                    } else {
+                        closeToRepository.setWeight(
+                                tables.get(i).getDatabaseName(), tables.get(i).getTableName(),
+                                tables.get(j).getDatabaseName(), tables.get(j).getTableName(),
+                                level, getUpdatedWeight(closeToList.get(0), frequency, level));
+                    }
+                }
+            }
+        }
+    }
 
+    //前几级连过的边不再连
     private void checkAndSetWeight(List<Table> tables, int level, double frequency){
         if(tables != null){
             for(int i = 0; i < tables.size(); i++){
@@ -267,17 +297,27 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         }
     }
 
+
     private double getUpdatedWeight(double weight, double frequency, int level){
-//        if(frequency <= 0) {
-//            switch(level){
-//                case SQL_LEVEL:{
-//                    return weight + 1;
-//                }
-//                case TRACE_LEVEL:{
-//                    return weight + 0.1;
-//                }
-//            }
-//        }
+        switch(level){
+            case SQL_LEVEL:{
+                return weight + 0.02*frequency + 25 ;
+            }
+            case TRACE_LEVEL:{
+                return weight + 0.015*frequency + 20;
+            }
+            case SCENARIO_LEVEL:{
+                return weight + 0.01*frequency + 10;
+            }
+            case PACKAGE_LEVEL:{
+                return weight + 5;
+            }
+            case MODULE_LEVEL:{
+                return weight + 0.1 * frequency + 5;
+            }
+            default: return -1;
+        }
+
 //        switch(level){
 //            case SQL_LEVEL:{
 //                return weight + 10*frequency + 100;
@@ -297,24 +337,24 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 //            default: return -1;
 //        }
 
-        switch(level){
-            case SQL_LEVEL:{
-                return weight + 100;
-            }
-            case TRACE_LEVEL:{
-                return weight + 50;
-            }
-            case SCENARIO_LEVEL:{
-                return weight + 10;
-            }
-            case PACKAGE_LEVEL:{
-                return weight + 5;
-            }
-            case MODULE_LEVEL:{
-                return weight + 5;
-            }
-            default: return -1;
-        }
+//        switch(level){
+//            case SQL_LEVEL:{
+//                return weight + 10;
+//            }
+//            case TRACE_LEVEL:{
+//                return weight + 50;
+//            }
+//            case SCENARIO_LEVEL:{
+//                return weight + 100;
+//            }
+//            case PACKAGE_LEVEL:{
+//                return weight + 5;
+//            }
+//            case MODULE_LEVEL:{
+//                return weight + 5;
+//            }
+//            default: return -1;
+//        }
     }
 
 

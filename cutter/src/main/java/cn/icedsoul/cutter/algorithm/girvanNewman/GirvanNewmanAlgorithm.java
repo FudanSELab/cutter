@@ -13,7 +13,11 @@ import java.util.stream.Collectors;
 
 public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
     double[][] G;
-    int k;
+    int k = 0;
+
+    public GirvanNewmanAlgorithm(double[][] G){
+        this.G = G;
+    }
 
     public GirvanNewmanAlgorithm(double[][] G, int k){
         this.G = G;
@@ -48,7 +52,9 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
         }
         // When
         GirvanNewmanClusterer clusterer = new GirvanNewmanClusterer();
-        clusterer.setPreferredNumberOfClusters(k);
+        if(k > 0){
+            clusterer.setPreferredNumberOfClusters(k);
+        }
         clusterer.execute(model);
         // Then
         Cluster[] result = clusterer.getClusters();
