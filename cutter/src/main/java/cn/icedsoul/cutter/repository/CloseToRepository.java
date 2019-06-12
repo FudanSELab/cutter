@@ -36,7 +36,7 @@ public interface CloseToRepository extends Neo4jRepository<CloseTo, Long> {
      */
     @Query("match (n:Table)-[r:CLOSETO]->(t:Table) " +
             "where id(n)={0} and r.level <= 5 " +
-            "return id(n) as startTableId, id(t) as endTableId, r.weight as weight")
+            "return id(n) as startTableId, id(t) as endTableId, r.weight as weight, r.level as level")
     List<CloseToRelation> findCloseTosOfNode(long nodeId);
 
 }
