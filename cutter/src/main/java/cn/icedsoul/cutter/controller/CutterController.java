@@ -1,6 +1,7 @@
 package cn.icedsoul.cutter.controller;
 
 import cn.icedsoul.cutter.domain.bo.ShareTable;
+import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.MethodRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
@@ -67,23 +68,69 @@ public class CutterController {
     @PostMapping(value = "/cut")
     @ApiOperation(value = "Cut table", notes = "Cut table to k parts")
     public Map<Integer, List<String>> cutTable(@RequestParam("k") int k){
-        return tableCutService.cutTable(k);
+        Map<Integer, List<String>> cutClusters = tableCutService.cutTable(k);
+//        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+//        List<Set<String>> sharingClusters = new ArrayList<>();
+//        Set<String> s1 = new HashSet<>();
+//        s1.add("sys_log");
+//        Set<String> s2 = new HashSet<>();
+//        s2.add("oa_notify");
+//        s2.add("oa_notify_record");
+//        Set<String> s3 = new HashSet<>();
+//        s3.add("sys_user");
+//        s3.add("sys_office");
+//        sharingClusters.add(s1);
+//        sharingClusters.add(s2);
+//        sharingClusters.add(s3);
+
+        Map<Integer, List<String>> result  = new HashMap<>();
+        int i = 1;
+        Set<String> usedTables = new HashSet<>();
+        System.out.println("=====FINAL RESULT:=====");
+//        for(Set<String> set: sharingClusters){
+//            List<String> tempTables = new ArrayList<>();
+//            for(String t: set){
+//                tempTables.add(t);
+//                usedTables.add(t);
+//            }
+//            System.out.println("第"+ i + "组：" + tempTables);
+//            result.put(i, tempTables);
+//            i++;
+//        }
+//        for(Set<ShareTable> set: sharingClusters){
+//            List<String> tempTables = new ArrayList<>();
+//            for(ShareTable t: set){
+//                tempTables.add(t.getTable().getTableName());
+//                usedTables.add(t.getTable().getTableName());
+//            }
+//            System.out.println("第"+ i + "组：" + tempTables);
+//            result.put(i, tempTables);
+//            i++;
+//        }
+        for(int key: cutClusters.keySet()){
+            List<String> cluster = cutClusters.get(key);
+            List<String> tempTables = new ArrayList<>();
+            for(String s: cluster){
+                if(!usedTables.contains(s)){
+                    tempTables.add(s);
+                }
+            }
+            if(!tempTables.isEmpty()){
+                System.out.println("第"+ i + "组：" + tempTables);
+                result.put(i, tempTables);
+                i++;
+            }
+        }
+        return result;
     }
+
 
 //    @CrossOrigin(origins = "*")
-//    @GetMapping(value = "/communitydetection")
-//    @ApiOperation(value = "Cut table with", notes = "Cut table with community detection algorithm")
-//    public Map<Integer, List<String>> communityDetection(){
-//        return tableCutService.communityDetection();
+//    @GetMapping(value = "/calculateSharingDegree")
+//    @ApiOperation(value = "calculate sharing degree", notes = "calculate sharing degree")
+//    public void calculateSharingDegree(){
+//        sharingDegreeService.calculateSharingDegree();
 //    }
-
-
-    @CrossOrigin(origins = "*")
-    @GetMapping(value = "/calculateSharingDegree")
-    @ApiOperation(value = "calculate sharing degree", notes = "calculate sharing degree")
-    public void calculateSharingDegree(){
-        sharingDegreeService.calculateSharingDegree();
-    }
 
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/clearCloseTo")

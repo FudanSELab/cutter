@@ -319,10 +319,10 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     private double getUpdatedWeight(double weight, double frequency, int level){
         switch(level){
             case SQL_LEVEL:{
-                return weight + 0.02*frequency + 25 ;
+                return weight + 0.02*frequency + 25;
             }
             case TRACE_LEVEL:{
-                return weight + 0.015*frequency + 20;
+                return weight + 0.015*frequency + 15;
             }
             case SCENARIO_LEVEL:{
                 return weight + 0.01*frequency + 10;
