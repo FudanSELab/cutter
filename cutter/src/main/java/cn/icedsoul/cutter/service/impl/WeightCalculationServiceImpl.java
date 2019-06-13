@@ -56,38 +56,45 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
     @Override
-    public void addSimilarWeight() {
+    public List<Double[][]> addSimilarWeight() {
         List<Table> tables = Lists.newArrayList(tableRepository.findAll());
-        double[][] sqlWeightGraph = new double[100][100];
-        double[][] traceWeightGraph = new double[100][100];
-        double[][] scenarioWeightGraph = new double[100][100];
+        List<Double[][]> graph = new ArrayList<>();
+        Double[][] sqlWeightGraph = new Double[tables.size()][tables.size()];
+        Double[][] traceWeightGraph = new Double[tables.size()][tables.size()];
+        Double[][] scenarioWeightGraph = new Double[tables.size()][tables.size()];
 
         for (int i = 0; i < tables.size(); i++){
+            sqlWeightGraph[i][i] = 1.0;
             for (int j = i + 1; j < tables.size(); j++){
                 List<Double> result = calculateSimilar(tables.get(i), tables.get(j));
-                sqlWeightGraph[i][j] = result.get(0);
-                traceWeightGraph[i][j] = result.get(1);
-                scenarioWeightGraph[i][j] = result.get(2);
+                sqlWeightGraph[j][i] = sqlWeightGraph[i][j] = result.get(0);
+                traceWeightGraph[j][i] = traceWeightGraph[i][j] = result.get(1);
+                scenarioWeightGraph[j][i] = scenarioWeightGraph[i][j] = result.get(2);
             }
         }
-        for(int i = 0; i < sqlWeightGraph.length; i++){
-            for(int j = 0; j < sqlWeightGraph[i].length; j++){
-                System.out.print(sqlWeightGraph[i][j] + " ");
-            }
-            System.out.println();
-        }
-        for(int i = 0; i < traceWeightGraph.length; i++){
-            for(int j = 0; j < traceWeightGraph[i].length; j++){
-                System.out.print(traceWeightGraph[i][j] + " ");
-            }
-            System.out.println();
-        }
-        for(int i = 0; i < scenarioWeightGraph.length; i++){
-            for(int j = 0; j < scenarioWeightGraph[i].length; j++){
-                System.out.print(scenarioWeightGraph[i][j] + " ");
-            }
-            System.out.println();
-        }
+//        for(int i = 0; i < sqlWeightGraph.length; i++){
+//            for(int j = 0; j < sqlWeightGraph[i].length; j++){
+//                System.out.print(sqlWeightGraph[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        for(int i = 0; i < traceWeightGraph.length; i++){
+//            for(int j = 0; j < traceWeightGraph[i].length; j++){
+//                System.out.print(traceWeightGraph[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        for(int i = 0; i < scenarioWeightGraph.length; i++){
+//            for(int j = 0; j < scenarioWeightGraph[i].length; j++){
+//                System.out.print(scenarioWeightGraph[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+        graph.add(sqlWeightGraph);
+        graph.add(traceWeightGraph);
+        graph.add(scenarioWeightGraph);
+        return graph;
+
     }
 
     private List<Double> calculateSimilar(Table a, Table b){

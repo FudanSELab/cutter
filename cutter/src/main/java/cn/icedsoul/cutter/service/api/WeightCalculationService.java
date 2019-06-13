@@ -1,5 +1,7 @@
 package cn.icedsoul.cutter.service.api;
 
+import java.util.List;
+
 public interface WeightCalculationService {
 
     void addSameScenarioWeight();
@@ -14,6 +16,6 @@ public interface WeightCalculationService {
 
     void addWeight();
 
-    void addSimilarWeight();
+    List<Double[][]> addSimilarWeight();
 
 }
