@@ -69,7 +69,7 @@ public class CutterController {
     @ApiOperation(value = "Cut table", notes = "Cut table to k parts")
     public Map<Integer, List<String>> cutTable(@RequestParam("k") int k){
         Map<Integer, List<String>> cutClusters = tableCutService.cutTable(k);
-//        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
 //        List<Set<String>> sharingClusters = new ArrayList<>();
 //        Set<String> s1 = new HashSet<>();
 //        s1.add("sys_log");
@@ -97,16 +97,16 @@ public class CutterController {
 //            result.put(i, tempTables);
 //            i++;
 //        }
-//        for(Set<ShareTable> set: sharingClusters){
-//            List<String> tempTables = new ArrayList<>();
-//            for(ShareTable t: set){
-//                tempTables.add(t.getTable().getTableName());
-//                usedTables.add(t.getTable().getTableName());
-//            }
-//            System.out.println("第"+ i + "组：" + tempTables);
-//            result.put(i, tempTables);
-//            i++;
-//        }
+        for(Set<ShareTable> set: sharingClusters){
+            List<String> tempTables = new ArrayList<>();
+            for(ShareTable t: set){
+                tempTables.add(t.getTable().getTableName());
+                usedTables.add(t.getTable().getTableName());
+            }
+            System.out.println("第"+ i + "组：" + tempTables);
+            result.put(i, tempTables);
+            i++;
+        }
         for(int key: cutClusters.keySet()){
             List<String> cluster = cutClusters.get(key);
             List<String> tempTables = new ArrayList<>();
@@ -123,14 +123,6 @@ public class CutterController {
         }
         return result;
     }
-
-
-//    @CrossOrigin(origins = "*")
-//    @GetMapping(value = "/calculateSharingDegree")
-//    @ApiOperation(value = "calculate sharing degree", notes = "calculate sharing degree")
-//    public void calculateSharingDegree(){
-//        sharingDegreeService.calculateSharingDegree();
-//    }
 
     @CrossOrigin(origins = "*")
     @GetMapping(value = "/clearCloseTo")
@@ -163,7 +155,6 @@ public class CutterController {
         }
         System.out.println("---idList:---");
         System.out.println(idList);
-//        return null;
         return splitCostService.getSplitCost(idList);
     }
 

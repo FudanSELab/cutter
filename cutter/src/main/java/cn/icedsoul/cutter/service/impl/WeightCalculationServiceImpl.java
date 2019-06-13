@@ -327,44 +327,6 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             default: return -1.0;
         }
-
-//        switch(level){
-//            case SQL_LEVEL:{
-//                return weight + 10*frequency + 100;
-//            }
-//            case TRACE_LEVEL:{
-//                return weight + 5*frequency + 50;
-//            }
-//            case SCENARIO_LEVEL:{
-//                return weight + 2*frequency + 10;
-//            }
-//            case PACKAGE_LEVEL:{
-//                return weight + 5;
-//            }
-//            case MODULE_LEVEL:{
-//                return weight + 1 * frequency + 5;
-//            }
-//            default: return -1;
-//        }
-
-//        switch(level){
-//            case SQL_LEVEL:{
-//                return weight + 10;
-//            }
-//            case TRACE_LEVEL:{
-//                return weight + 50;
-//            }
-//            case SCENARIO_LEVEL:{
-//                return weight + 100;
-//            }
-//            case PACKAGE_LEVEL:{
-//                return weight + 5;
-//            }
-//            case MODULE_LEVEL:{
-//                return weight + 5;
-//            }
-//            default: return -1;
-//        }
     }
 
 
