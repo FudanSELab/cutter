@@ -59,7 +59,8 @@ public class CutterController {
     @GetMapping(value = "/weight")
     @ApiOperation(value = "Add weight", notes = "Add weight")
     public void addWeight(){
-        weightCalculationService.addWeight();
+//        weightCalculationService.addWeight();
+        weightCalculationService.addSimilarWeight();
     }
 
     @CrossOrigin(origins = "*")

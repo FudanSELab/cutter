@@ -63,12 +63,30 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         double[][] scenarioWeightGraph = new double[100][100];
 
         for (int i = 0; i < tables.size(); i++){
-            for (int j = 0; j < tables.size(); j++){
+            for (int j = i + 1; j < tables.size(); j++){
                 List<Double> result = calculateSimilar(tables.get(i), tables.get(j));
                 sqlWeightGraph[i][j] = result.get(0);
                 traceWeightGraph[i][j] = result.get(1);
                 scenarioWeightGraph[i][j] = result.get(2);
             }
+        }
+        for(int i = 0; i < sqlWeightGraph.length; i++){
+            for(int j = 0; j < sqlWeightGraph[i].length; j++){
+                System.out.print(sqlWeightGraph[i][j] + " ");
+            }
+            System.out.println();
+        }
+        for(int i = 0; i < traceWeightGraph.length; i++){
+            for(int j = 0; j < traceWeightGraph[i].length; j++){
+                System.out.print(traceWeightGraph[i][j] + " ");
+            }
+            System.out.println();
+        }
+        for(int i = 0; i < scenarioWeightGraph.length; i++){
+            for(int j = 0; j < scenarioWeightGraph[i].length; j++){
+                System.out.print(scenarioWeightGraph[i][j] + " ");
+            }
+            System.out.println();
         }
     }
 

@@ -272,7 +272,6 @@ public class HandleDataServiceImpl implements HandleDataService {
             addTraceWeight(baseRelation);
             table.addTrace(baseRelation.getTraceId());
             if(!baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_NAME) && !baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_ID)) {
-                log.info(dbAndTable + " " + baseRelation.getScenarioId() + " " + baseRelation.getScenarioFrequency());
                 addScenarioWeight(baseRelation);
                 table.addScenario(baseRelation.getScenarioId());
             }
