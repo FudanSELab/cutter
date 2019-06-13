@@ -65,6 +65,8 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
 
         for (int i = 0; i < tables.size(); i++){
             sqlWeightGraph[i][i] = 1.0;
+            traceWeightGraph[i][i] = 1.0;
+            scenarioWeightGraph[i][i] = 1.0;
             for (int j = i + 1; j < tables.size(); j++){
                 List<Double> result = calculateSimilar(tables.get(i), tables.get(j));
                 sqlWeightGraph[j][i] = sqlWeightGraph[i][j] = result.get(0);
@@ -72,24 +74,6 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                 scenarioWeightGraph[j][i] = scenarioWeightGraph[i][j] = result.get(2);
             }
         }
-//        for(int i = 0; i < sqlWeightGraph.length; i++){
-//            for(int j = 0; j < sqlWeightGraph[i].length; j++){
-//                System.out.print(sqlWeightGraph[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-//        for(int i = 0; i < traceWeightGraph.length; i++){
-//            for(int j = 0; j < traceWeightGraph[i].length; j++){
-//                System.out.print(traceWeightGraph[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-//        for(int i = 0; i < scenarioWeightGraph.length; i++){
-//            for(int j = 0; j < scenarioWeightGraph[i].length; j++){
-//                System.out.print(scenarioWeightGraph[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
         graph.add(sqlWeightGraph);
         graph.add(traceWeightGraph);
         graph.add(scenarioWeightGraph);
@@ -98,7 +82,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
     private List<Double> calculateSimilar(Table a, Table b){
-        double aSqlNum = 0, bSqlNum = 0, abSqlNum = 0;
+        Double aSqlNum = 0.0, bSqlNum = 0.0, abSqlNum = 0.0;
         for(Long aSqlId : a.getAppearSql()){
             for(Long bSqlId : b.getAppearSql()){
                 if(aSqlId.equals(bSqlId)){
@@ -111,7 +95,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             aSqlNum += sqlWeight.get(aSqlId);
         }
 
-        double aTraceNum = 0, bTraceNum = 0, abTraceNum = 0;
+        Double aTraceNum = 0.0, bTraceNum = 0.0, abTraceNum = 0.0;
         for(Long aTraceId : a.getAppearTrace()){
             for(Long bTraceId : b.getAppearTrace()){
                 if(aTraceId.equals(bTraceId)){
@@ -123,7 +107,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             aTraceNum += traceWeight.get(aTraceId);
         }
-        double aScenarioNum = 0, bScenarioNum = 0, abScenarioNum = 0;
+        Double aScenarioNum = 0.0, bScenarioNum = 0.0, abScenarioNum = 0.0;
         for(String aScenarioId : a.getAppearScenario()){
             for(String bScenarioId : b.getAppearScenario()){
                 if(aScenarioId.equals(bScenarioId)){
@@ -135,11 +119,12 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             aScenarioNum += scenarioWeight.get(aScenarioId);
         }
-        double sqlSimilar = abSqlNum / (aSqlNum + bSqlNum - abSqlNum);
-        double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
-        double scenarioSimilar = abScenarioNum / (aScenarioNum + bScenarioNum - abScenarioNum);
+        Double sqlSimilar = abSqlNum / (aSqlNum + bSqlNum - abSqlNum);
+        Double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
+        Double scenarioSimilar = abScenarioNum / (aScenarioNum + bScenarioNum - abScenarioNum);
         List<Double> result = new ArrayList<>();
-        log.info(String.format("%s %s : %.2f        %.2f         %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
+        log.info(String.format("%f %f %f %f %f %f %f %f %f", aSqlNum, bSqlNum, abSqlNum, aTraceNum, bTraceNum, abTraceNum, aScenarioNum, bScenarioNum, abScenarioNum));
+        log.info(String.format("%s %s : %.2f %.2f %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
         result.add(sqlSimilar);
         result.add(traceSimilar);
         result.add(scenarioSimilar);
@@ -155,7 +140,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             Sql sql = sqlIterator.next();
 //            System.out.println("---sql:"+sql.toString());
             //获取所有调用这条sql的方法的总的调用频率
-            double sqlFrequency = sqlRepository.getSumSqlFrequencyBySqlId(sql.getId());
+            Double sqlFrequency = sqlRepository.getSumSqlFrequencyBySqlId(sql.getId());
 //            System.out.println("---sqlId="+sql.getId() + " sqlFrequency=" + sqlFrequency);
             if(sqlFrequency > 0){
                 //查询这条sql操作的所有table，两两之间连条边
@@ -180,7 +165,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                         System.out.println("!!!Error! one scenario has different scenarioFrequency!!!");
                         break;
                     }
-                    double traceFrequency = tl.get(0);
+                    Double traceFrequency = tl.get(0);
 //                    System.out.println("---traceId="+traceId +" ---traceFrequency=" + traceFrequency);
                     if(traceFrequency > 0){
                         //获取一条trace中的所有table，两两之间连条边
@@ -209,7 +194,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                         System.out.println("!!!Error! one trace has different scenarioFrequency!!!");
                         break;
                     }
-                    double scenarioFrequency = fl.get(0);
+                    Double scenarioFrequency = fl.get(0);
 //                    System.out.println("======scenarioId="+scenarioId + "==scenarioFrequency=" + scenarioFrequency);
                     if(scenarioFrequency > 0){
                         //获取一个场景中涉及到的所有table，两两之间连条边
@@ -231,7 +216,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             for(String module: moduleList){
                 if( module != null  && !"no-module-name".equals(module)){
                     //获取module下所有trace的调用频率总和
-                    double moduleFrequency = methodCallRepository.getFrequencyByModuleName(module);
+                    Double moduleFrequency = methodCallRepository.getFrequencyByModuleName(module);
                     System.out.println("--moduleFrequency=" + moduleFrequency);
                     //获取同一个module下的所有table
                     List<Table> tables =  tableRepository.findTablesOfSameModule(module);
@@ -253,11 +238,11 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         List<Table> tables = tableRepository.findTablesOfSamePackage(packageId);
         System.out.println(tables);
         //table之间两两连条边
-        checkAndSetWeight(tables, PACKAGE_LEVEL, 0);
+        checkAndSetWeight(tables, PACKAGE_LEVEL, 0.0);
     }
 
     //每级都连边
-    private void checkAndSetWeight2(List<Table> tables, int level, double frequency){
+    private void checkAndSetWeight2(List<Table> tables, int level, Double frequency){
         if(tables != null){
             for(int i = 0; i < tables.size(); i++) {
                 for (int j = i + 1; j < tables.size(); j++) {
@@ -269,7 +254,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                         closeTo.setStartTable(tables.get(i));
                         closeTo.setEndTable(tables.get(j));
                         closeTo.setLevel(level);
-                        closeTo.setWeight(getUpdatedWeight(0, frequency, level));
+                        closeTo.setWeight(getUpdatedWeight(0.0, frequency, level));
                         closeToRepository.save(closeTo);
                     } else if(closeToList.size() > 1){
                         System.out.println("!!!!!!Error: Two tables has more than one edge at one level!!!!!!!");
@@ -285,7 +270,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
     //前几级连过的边不再连
-    private void checkAndSetWeight(List<Table> tables, int level, double frequency){
+    private void checkAndSetWeight(List<Table> tables, int level, Double frequency){
         if(tables != null){
             for(int i = 0; i < tables.size(); i++){
                 for(int j = i +1; j < tables.size(); j++){
@@ -306,7 +291,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
                             closeTo.setStartTable(tables.get(i));
                             closeTo.setEndTable(tables.get(j));
                             closeTo.setLevel(level);
-                            closeTo.setWeight(getUpdatedWeight(0, frequency, level));
+                            closeTo.setWeight(getUpdatedWeight(0.0, frequency, level));
                             closeToRepository.save(closeTo);
                         } else if(closeToList.size() > 1){
                             System.out.println("!!!!!!Error: Two tables has more than one edge!!!!!!!");
@@ -323,7 +308,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
 
-    private double getUpdatedWeight(double weight, double frequency, int level){
+    private Double getUpdatedWeight(Double weight, Double frequency, int level){
         switch(level){
             case SQL_LEVEL:{
                 return weight + 0.02*frequency + 25;
@@ -340,7 +325,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             case MODULE_LEVEL:{
                 return weight + 0.1 * frequency + 5;
             }
-            default: return -1;
+            default: return -1.0;
         }
 
 //        switch(level){
