@@ -7,7 +7,9 @@ import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.domain.dto.CloseToRelation;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
+import cn.icedsoul.cutter.service.api.SharingDegreeService;
 import cn.icedsoul.cutter.service.api.TableCutService;
+import cn.icedsoul.cutter.service.api.WeightCalculationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,32 +22,22 @@ public class TableCutServiceImpl implements TableCutService {
     TableRepository tableRepository;
     @Autowired
     CloseToRepository closeToRepository;
+    @Autowired
+    WeightCalculationService weightCalculationService;
 
     List<Table> tableList;
     int tableSize;
     double[][] G;
-    //分级的矩阵
-    double[][] G1, G2, G3;
-
-    /**
-     * 从tableid到tableList中下标的映射
-     */
+    double alpha = 1, beta = 0.5, gama = 0.2;
+    //从tableid到tableList中下标的映射
     Map<Long, Integer> tableMap = new HashMap<>();
     Map<Integer, List<Integer>> clusters;
 
     @Override
     public Map<Integer, List<String>> cutTable(int k) {
-        generateGraph2();
-        normalize();
-        printG(G1);
-        printG(G2);
-        printG(G3);
+         generateGraph();
+         printG(G);
 
-
-//        generateGraph();
-//        changeG(G);
-//        printG(G);
-//        calculateAffinity();
         if(null != G){
 //            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
 //            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
@@ -60,16 +52,31 @@ public class TableCutServiceImpl implements TableCutService {
     }
 
 
-//    @Override
-//    public Map<Integer, List<String>> communityDetection() {
-//        generateGraph();
-//        if(null != G){
-//            CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
-//            clusters = cutGraphAlgorithm.calculate();
-//            return translateClusters(clusters);
-//        }
-//        return null;
-//    }
+    public void generateGraph(){
+        tableList = (List)tableRepository.findAll();
+        if(null != tableList) {
+            tableSize = tableList.size();
+            //初始化从tableid到tableList中下标的映射
+            initTableMap();
+            //合成G
+            G = new double[tableSize][tableSize];
+            List<Double[][]> weightMatrixs = weightCalculationService.addSimilarWeight();
+            Double[][] G1 = weightMatrixs.get(0);
+            System.out.println("---G1----");
+            printG123(G1);
+            Double[][] G2 = weightMatrixs.get(1);
+            System.out.println("---G2----");
+            printG123(G2);
+            Double[][] G3 = weightMatrixs.get(2);
+            System.out.println("---G3----");
+            printG123(G3);
+            for(int i = 0; i < tableSize; i++){
+                for(int j = 0; j < tableSize; j++){
+                    G[i][j] = alpha * G1[i][j] + beta * G2[i][j] + gama * G3[i][j];
+                }
+            }
+        }
+    }
 
     //打印拆分List
     private Map<Integer, List<String>> translateClusters(Map<Integer, List<Integer>> clusters){
@@ -90,92 +97,6 @@ public class TableCutServiceImpl implements TableCutService {
     }
 
 
-    private void normalize(){
-        for(int i = 0; i < tableSize; i ++){
-            double rowSum1 = 0, rowSum2 = 0, rowSum3 = 0;
-            for(int j = 0; j < tableSize; j++){
-                rowSum1 += G1[i][j] * G1[i][j];
-                rowSum2 += G2[i][j] * G2[i][j];
-                rowSum3 += G3[i][j] * G3[i][j];
-            }
-            rowSum1 = Math.sqrt(rowSum1);
-            rowSum2 = Math.sqrt(rowSum2);
-            rowSum3 = Math.sqrt(rowSum3);
-            for(int j = 0; j < tableSize; j++){
-                G1[i][j] /= rowSum1;
-                G2[i][j] /= rowSum2;
-                G3[i][j] /= rowSum3;
-            }
-        }
-        G = new double[tableSize][tableSize];
-        for(int i = 0; i < tableSize; i++){
-            for(int j = 0; j < tableSize; j++){
-                G[i][j] = G1[i][j] + G2[i][j] + G3[i][j];
-            }
-        }
-    }
-
-    //生成邻接矩阵,三个level三个矩阵
-    private void generateGraph2(){
-        tableList = (List)tableRepository.findAll();
-//        printTableList();
-        if(null != tableList){
-            tableSize = tableList.size();
-            //初始化从tableid到tableList中下标的映射
-            initTableMap();
-            G1 = new double[tableSize][tableSize];
-            G2 = new double[tableSize][tableSize];
-            G3 = new double[tableSize][tableSize];
-            for(int i = 0; i < tableSize; i++){
-                List<CloseToRelation> CloseToRelationList = closeToRepository.findCloseTosOfNode(tableList.get(i).getId());
-//                System.out.println("----"+CloseToRelationList);
-                for(CloseToRelation ctr: CloseToRelationList){
-                    if(ctr.getLevel() == 1){
-                        G1[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
-                        G1[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
-                    } else if(ctr.getLevel() == 2){
-                        G2[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
-                        G2[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
-                    } else if(ctr.getLevel() == 3){
-                        G3[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
-                        G3[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
-                    }
-
-                }
-            }
-//            for(int i = 0; i < tableSize; i++){
-//                for(int j = 0; j < i; j++){
-//                    G[i][j] = G[j][i];
-//                }
-//            }
-        }
-    }
-
-    //生成邻接矩阵
-    private void generateGraph(){
-        tableList = (List)tableRepository.findAll();
-        printTableList();
-        if(null != tableList){
-            tableSize = tableList.size();
-            //初始化从tableid到tableList中下标的映射
-            initTableMap();
-            G = new double[tableSize][tableSize];
-            for(int i = 0; i < tableSize; i++){
-                List<CloseToRelation> CloseToRelationList = closeToRepository.findCloseTosOfNode(tableList.get(i).getId());
-                System.out.println("----"+CloseToRelationList);
-                for(CloseToRelation ctr: CloseToRelationList){
-                    G[tableMap.get(ctr.getStartTableId())][tableMap.get(ctr.getEndTableId())] = ctr.getWeight();
-                    G[tableMap.get(ctr.getEndTableId())][tableMap.get(ctr.getStartTableId())] = ctr.getWeight();
-                }
-            }
-//            for(int i = 0; i < tableSize; i++){
-//                for(int j = 0; j < i; j++){
-//                    G[i][j] = G[j][i];
-//                }
-//            }
-        }
-    }
-
     //table的id和在矩阵中的index的对应map
     private void initTableMap(){
         tableMap.clear();
@@ -184,24 +105,20 @@ public class TableCutServiceImpl implements TableCutService {
         }
     }
 
-    //从邻接矩阵生成吸引度矩阵
-    //a对b的吸引度=ab边的权重/与b相连所有边的权重
-    private void calculateAffinity(){
-        for(int i = 0; i < tableSize; i++){
-            int sum = 0;
-            for(int j = 0; j < tableSize; j++){
-                sum += G[i][j];
+    private void printG(double[][] G){
+        int n = G.length;
+        for(int i = 0; i < n; i++){
+            System.out.print("{ ");
+            for(int j = 0; j < n;j++){
+                if(j != n-1) System.out.print(G[i][j] + ", ");
+                else System.out.print(G[i][j]);
             }
-            if(sum > 0){
-                for(int j = 0; j < tableSize; j++){
-                    G[i][j] = G[i][j] / sum;
-                }
-            }
+            System.out.println(" },");
         }
-        printG(G);
+        System.out.println("----------------");
     }
 
-    private void printG(double[][] G){
+    private void printG123(Double[][] G){
         int n = G.length;
         for(int i = 0; i < n; i++){
             System.out.print("{ ");
