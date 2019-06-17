@@ -5,8 +5,6 @@ import cn.icedsoul.cutter.service.api.WeightCalculationService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +50,7 @@ public class HandleData implements CommandLineRunner {
     private WeightCalculationService weightCalculationService;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args){
         if(!isNullString(file)){
             handleDataService.handleData(file);
             weightCalculationService.addSimilarWeight();

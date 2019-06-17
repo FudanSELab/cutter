@@ -26,6 +26,16 @@ public class Common {
 
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    public static void initGlobal(){
+        ENTRY = null;
+        TMP_SQL = null;
+        ROOT = null;
+        requests.clear();
+        sqlWeight.clear();
+        traceWeight.clear();
+        scenarioWeight.clear();
+    }
+
     public static boolean isNull(Object o){
         if(o == null) {
             return true;

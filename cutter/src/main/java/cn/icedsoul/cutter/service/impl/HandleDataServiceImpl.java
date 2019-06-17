@@ -13,6 +13,7 @@ import cn.icedsoul.cutter.util.CONSTANT;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -31,6 +32,7 @@ import static cn.icedsoul.cutter.util.Common.*;
  */
 @Log
 @Service
+@Transactional
 public class HandleDataServiceImpl implements HandleDataService {
 
     @Resource
@@ -71,6 +73,8 @@ public class HandleDataServiceImpl implements HandleDataService {
     @Override
     public void handleData(String fileName) {
         clearDatabase();
+        initGlobal();
+        relations.clear();
         File file = new File(fileName);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -261,31 +265,27 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private void handleTable(String dbAndTable, BaseRelation baseRelation){
         String[] content = dbAndTable.split(":", 2);
-//        try {
-            if("dual".equals(content[1]) || content[1].contains(".")){
-                return;
-            }
-            Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
-            if(isNull(table)){
-                table = new Table(content[0], content[1].toLowerCase());
-            }
-            addTraceWeight(baseRelation);
-            table.addTrace(baseRelation.getTraceId());
-            if(!baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_NAME) && !baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_ID)) {
-                addScenarioWeight(baseRelation);
-                table.addScenario(baseRelation.getScenarioId());
-            }
-            table.addModule(baseRelation.getModuleName());
-            table = tableRepository.save(table);
-            Contain contain = new Contain(baseRelation);
-            contain.setSql(TMP_SQL);
-            contain.setTable(table);
-            relations.add(contain);
-            log.info("[NOTICE]: I'm handling Table.");
-//        } catch (Exception e){
-//            log.info(e.getMessage());
-//        }
 
+        if("dual".equals(content[1]) || content[1].contains(".")){
+            return;
+        }
+        Table table = tableRepository.findByDatabaseNameAndAndTableName(content[0], content[1].toLowerCase());
+        if(isNull(table)){
+            table = new Table(content[0], content[1].toLowerCase());
+        }
+        addTraceWeight(baseRelation);
+        table.addTrace(baseRelation.getTraceId());
+        if(!baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_NAME) && !baseRelation.getScenarioId().equals(CONSTANT.NO_SCENARIO_ID)) {
+            addScenarioWeight(baseRelation);
+            table.addScenario(baseRelation.getScenarioId());
+        }
+        table.addModule(baseRelation.getModuleName());
+        table = tableRepository.save(table);
+        Contain contain = new Contain(baseRelation);
+        contain.setSql(TMP_SQL);
+        contain.setTable(table);
+        relations.add(contain);
+        log.info("[NOTICE]: I'm handling Table.");
     }
 
     private void clearDatabase() {

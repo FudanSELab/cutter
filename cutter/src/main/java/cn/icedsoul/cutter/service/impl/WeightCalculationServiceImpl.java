@@ -123,7 +123,7 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
         Double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
         Double scenarioSimilar = abScenarioNum / (aScenarioNum + bScenarioNum - abScenarioNum);
         List<Double> result = new ArrayList<>();
-        log.info(String.format("%f %f %f %f %f %f %f %f %f", aSqlNum, bSqlNum, abSqlNum, aTraceNum, bTraceNum, abTraceNum, aScenarioNum, bScenarioNum, abScenarioNum));
+//        log.info(String.format("%f %f %f %f %f %f %f %f %f", aSqlNum, bSqlNum, abSqlNum, aTraceNum, bTraceNum, abTraceNum, aScenarioNum, bScenarioNum, abScenarioNum));
         log.info(String.format("%s %s : %.2f %.2f %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
         result.add(sqlSimilar);
         result.add(traceSimilar);

@@ -23,4 +23,6 @@ public interface SqlRepository extends Neo4jRepository<Sql, Long> {
             "where id(s)={0} and r.scenarioFrequency > 0 " +
             "return sum(r.scenarioFrequency)")
     double getSumSqlFrequencyBySqlId(long slqId);
+
+
 }
