@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.icedsoul.cutter.util.Common.isNullString;
 
@@ -65,70 +66,74 @@ public class CutterController {
     }
 
     @CrossOrigin(origins = "*")
-    @PostMapping(value = "/cut")
-    @ApiOperation(value = "Cut table", notes = "Cut table to k parts")
-    public Map<Integer, List<String>> cutTable(@RequestParam("k") int k){
-        Map<Integer, List<String>> cutClusters = tableCutService.cutTable(k);
-        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
-//        List<Set<String>> sharingClusters = new ArrayList<>();
-//        Set<String> s1 = new HashSet<>();
-//        s1.add("sys_log");
-//        Set<String> s2 = new HashSet<>();
-//        s2.add("oa_notify");
-//        s2.add("oa_notify_record");
-//        Set<String> s3 = new HashSet<>();
-//        s3.add("sys_user");
-//        s3.add("sys_office");
-//        sharingClusters.add(s1);
-//        sharingClusters.add(s2);
-//        sharingClusters.add(s3);
+    @PostMapping(value = "/adjustWeightAndCut")
+    @ApiOperation(value = "Cut table3", notes = "Adjust the weight of tables that have high sharing degree and then cut table")
+    public Map<Integer, List<Table>> cutTable3(@RequestParam("k") int k){
+        Map<Integer, List<Table>> result = tableCutService.cutTable3(k);
 
-        Map<Integer, List<String>> result  = new HashMap<>();
-        int i = 1;
-        Set<String> usedTables = new HashSet<>();
-        System.out.println("=====FINAL RESULT:=====");
-//        for(Set<String> set: sharingClusters){
-//            List<String> tempTables = new ArrayList<>();
-//            for(String t: set){
-//                tempTables.add(t);
-//                usedTables.add(t);
-//            }
-//            System.out.println("第"+ i + "组：" + tempTables);
-//            result.put(i, tempTables);
-//            i++;
-//        }
-        for(Set<ShareTable> set: sharingClusters){
-            List<String> tempTables = new ArrayList<>();
-            for(ShareTable t: set){
-                tempTables.add(t.getTable().getTableName());
-                usedTables.add(t.getTable().getTableName());
-            }
-            System.out.println("第"+ i + "组：" + tempTables);
-            result.put(i, tempTables);
-            i++;
-        }
-        for(int key: cutClusters.keySet()){
-            List<String> cluster = cutClusters.get(key);
-            List<String> tempTables = new ArrayList<>();
-            for(String s: cluster){
-                if(!usedTables.contains(s)){
-                    tempTables.add(s);
-                }
-            }
-            if(!tempTables.isEmpty()){
-                System.out.println("第"+ i + "组：" + tempTables);
-                result.put(i, tempTables);
-                i++;
-            }
-        }
+        //calculate split cost
+        calculateSplitCost(result);
+
         return result;
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping(value = "/clearCloseTo")
-    @ApiOperation(value = "clear CloseTo", notes = "clear CloseTo")
-    public void clearCloseTo(){
-        closeToRepository.deleteAll();
+    @PostMapping(value = "/extractAndCut")
+    @ApiOperation(value = "Cut table2", notes = "Extract tables that sharing degree are high and then cut table")
+    public Map<Integer, List<Table>> cutTable2(@RequestParam("k") int k){
+        Map<Integer, List<Table>> result = tableCutService.cutTable2(k);
+        System.out.println("=====FINAL RESULT:=====");
+        for(int key: result.keySet()){
+            System.out.println("第"+ key + "组：" + result.get(key).stream().map(r -> r.getTableName()).collect(Collectors.toList()));
+        }
+        System.out.println("========================");
+
+        //calculate split cost
+        calculateSplitCost(result);
+
+        return result;
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/cutAndExtract")
+    @ApiOperation(value = "Cut table", notes = "Cut tables and then extract tables that sharing degree are high")
+    public Map<Integer, List<Table>> cutTable(@RequestParam("k") int k){
+        Map<Integer, List<Table>> cutClusters = tableCutService.cutTable(k);
+        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+
+        Map<Integer, List<Table>> result  = new HashMap<>();
+        int i = 1;
+        Set<String> usedTables = new HashSet<>();
+        System.out.println("=====FINAL RESULT:=====");
+        for(Set<ShareTable> set: sharingClusters){
+            List<Table> tempTables = new ArrayList<>();
+            for(ShareTable t: set){
+                tempTables.add(t.getTable());
+                usedTables.add(t.getTable().getTableName());
+            }
+            System.out.println("第"+ i + "组：" + tempTables.stream().map(t -> t.getTableName()).collect(Collectors.toList()));
+            result.put(i, tempTables);
+            i++;
+        }
+        for(int key: cutClusters.keySet()){
+            List<Table> cluster = cutClusters.get(key);
+            List<Table> tempTables = new ArrayList<>();
+            for(Table s: cluster){
+                if(!usedTables.contains(s.getTableName())){
+                    tempTables.add(s);
+                }
+            }
+            if(!tempTables.isEmpty()){
+                System.out.println("第"+ i + "组：" + tempTables.stream().map(t -> t.getTableName()).collect(Collectors.toList()));
+                result.put(i, tempTables);
+                i++;
+            }
+        }
+
+        //calculate split cost
+        calculateSplitCost(result);
+
+        return result;
     }
 
     @CrossOrigin(origins = "*")
@@ -136,15 +141,15 @@ public class CutterController {
     @ApiOperation(value = "split cost", notes = "split cost")
     public int[] splitCost(){
         List<List<String>> splitList = new ArrayList<>();
-//        splitList.add(Arrays.asList("sys_dict"));
-//        splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link",
-//                "sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu",
-//                "gen_table", "gen_scheme",
-//                "oa_notify", "sys_menu", "oa_notify_record", "sys_log", "cms_article_data", "cms_comment", "cms_guestbook" ));
-        splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link"));
-        splitList.add(Arrays.asList("sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu"));
-        splitList.add(Arrays.asList("gen_table", "gen_scheme", "sys_dict"));
-        splitList.add(Arrays.asList("oa_notify", "sys_menu", "oa_notify_record", "sys_log", "cms_article_data", "cms_comment", "cms_guestbook"));
+        splitList.add(Arrays.asList("sys_dict"));
+        splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link",
+                "sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu",
+                "gen_table", "gen_scheme",
+                "oa_notify", "sys_menu", "oa_notify_record", "sys_log", "cms_article_data", "cms_comment", "cms_guestbook" ));
+//        splitList.add(Arrays.asList("sys_user", "sys_office", "oa_test_audit", "cms_article", "cms_category", "cms_site", "cms_link"));
+//        splitList.add(Arrays.asList("sys_area", "sys_role", "sys_user_role", "sys_role_office", "sys_role_menu"));
+//        splitList.add(Arrays.asList("gen_table", "gen_scheme", "sys_dict"));
+//        splitList.add(Arrays.asList("oa_notify", "sys_menu", "oa_notify_record", "sys_log", "cms_article_data", "cms_comment", "cms_guestbook"));
         List<List<Long>> idList = new ArrayList<>();
         for(List<String> l:splitList){
             List<Long> ids = new ArrayList<>();
@@ -158,11 +163,23 @@ public class CutterController {
         return splitCostService.getSplitCost(idList);
     }
 
+
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/share")
     @ApiOperation(value = "share", notes = "share")
     public List<Set<ShareTable>> calShare(@RequestParam("k") int k){
         return sharingDegreeService.shareCalculate(k);
+    }
+
+    //calculate split cost
+    private void calculateSplitCost(Map<Integer, List<Table>> result){
+        List<List<Long>> idList = new ArrayList<>();
+        for(int groupNum: result.keySet()){
+            List<Table> tables = result.get(groupNum);
+            List<Long> ids = tables.stream().map(t -> t.getId()).collect(Collectors.toList());
+            idList.add(ids);
+        }
+        splitCostService.getSplitCost(idList);
     }
 
 }

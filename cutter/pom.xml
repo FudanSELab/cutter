@@ -88,10 +88,10 @@
         </dependency>
 
         <dependency>
-        <groupId>cn.dingding</groupId>
-        <artifactId>girvan-newman</artifactId>
-        <version>1.0</version>
-    </dependency>
+            <groupId>cn.dingding</groupId>
+            <artifactId>girvan-newman</artifactId>
+            <version>1.0</version>
+        </dependency>
 
     </dependencies>
 

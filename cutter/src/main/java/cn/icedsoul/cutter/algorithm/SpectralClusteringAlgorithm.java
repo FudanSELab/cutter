@@ -36,7 +36,7 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
         Map<Integer, List<Integer>> clusters = new HashMap<>();
 
         if(null == G || k > G.length) return clusters;
-        printG(G);
+//        printG(G);
         SpectralClustering sc = new SpectralClustering(G, k);
         for(int i = 0; i < sc.getNumClusters(); i ++){
             clusters.put(i, new ArrayList<>());
@@ -51,15 +51,15 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
     }
 
 
-    private void printG(double[][] G){
-        int n = G.length;
-        System.out.println("---邻接矩阵------");
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < n;j++){
-                System.out.print(G[i][j] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("----------------");
-    }
+//    private void printG(double[][] G){
+//        int n = G.length;
+//        System.out.println("---邻接矩阵------");
+//        for(int i = 0; i < n; i++){
+//            for(int j = 0; j < n;j++){
+//                System.out.print(G[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println("----------------");
+//    }
 }

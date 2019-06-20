@@ -11,6 +11,7 @@ public class FastNewmanAlgothrim implements CutGraphAlgorithm {
 
     double[][] G;
     int k;
+    Map<Integer, Map<Integer, List<Integer>>> result;
 
     public FastNewmanAlgothrim(double[][] G, int k){
         this.G = G;
@@ -37,7 +38,7 @@ public class FastNewmanAlgothrim implements CutGraphAlgorithm {
         ProgramEntrance p = new ProgramEntrance(d);
         p.start_clustering();
 
-        Map<Integer, Map<Integer, List<Integer>>> result = p.getResult();
+        result = p.getResult();
         Map<Integer, List<Integer>> temp = result.get(G.length - k);
         System.out.println("temp: " + temp);
         for(int i : temp.keySet()){
@@ -50,5 +51,9 @@ public class FastNewmanAlgothrim implements CutGraphAlgorithm {
             clusters.put(i, a);
         }
         return clusters;
+    }
+
+    public Map<Integer, Map<Integer, List<Integer>>> getResult(){
+        return result;
     }
 }
