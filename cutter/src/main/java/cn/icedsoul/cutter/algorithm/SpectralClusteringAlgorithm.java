@@ -23,8 +23,8 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
         for(int i = 0; i < n; i++){
             for(int j = i + 1; j < n; j++){
                 if(G[i][j] == 0){
-                    G[i][j] = 0.1;
-                    G[j][i] = 0.1;
+                    G[i][j] = 0.000001;
+                    G[j][i] = 0.000001;
                 }
             }
         }
@@ -32,6 +32,7 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
 
     @Override
     public Map<Integer, List<Integer>> calculate() {
+        // 不能有孤立的点
         preProcess();
         Map<Integer, List<Integer>> clusters = new HashMap<>();
 

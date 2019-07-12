@@ -2,6 +2,7 @@ package cn.icedsoul.cutter.service.impl;
 
 import cn.icedsoul.cutter.algorithm.CutGraphAlgorithm;
 import cn.icedsoul.cutter.algorithm.SpectralClusteringAlgorithm;
+import cn.icedsoul.cutter.algorithm.communityDetection.CommunityDetectionAlgorithm;
 import cn.icedsoul.cutter.algorithm.fastNewman.FastNewmanAlgothrim;
 import cn.icedsoul.cutter.algorithm.girvanNewman.GirvanNewmanAlgorithm;
 import cn.icedsoul.cutter.domain.bo.ShareTable;
@@ -52,7 +53,8 @@ public class TableCutServiceImpl implements TableCutService {
 //        CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
 //        CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
 //        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
-        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
         clusters = cutGraphAlgorithm.calculate();
 
         Map<Integer, List<Table>> result = new HashMap<>();
@@ -106,8 +108,9 @@ public class TableCutServiceImpl implements TableCutService {
         System.out.println("-----GwithoutShare---");
         printG(GwithoutShare);
 
-        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(GwithoutShare);
+//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(GwithoutShare);
 //        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(GwithoutShare, k);
+        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(GwithoutShare);
         clusters = cutGraphAlgorithm.calculate();
 
         //转换拆分结果
@@ -157,7 +160,8 @@ public class TableCutServiceImpl implements TableCutService {
         printG(G);
 
         //切图
-        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
         clusters = cutGraphAlgorithm.calculate();
 //        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
 //        clusters = cutGraphAlgorithm.calculate();
@@ -231,7 +235,18 @@ public class TableCutServiceImpl implements TableCutService {
                 }
             }
         }
+
+        //计算非零元素占G中所有元素的比例
+        int notZeroNum = 0;
+        for(int i = 0; i < tableSize; i++){
+            for(int j = 0; j < tableSize; j++){
+                if(G[i][j] > 0 ) notZeroNum ++;
+            }
+        }
+        double pro = (double)notZeroNum / (tableSize * tableSize);
+        System.out.println("G规模：" + (tableSize*tableSize) + " 非0元素的个数：" + notZeroNum + " 占比：" + pro);
     }
+
 
     //table的id和在矩阵中的index的对应map
     private void initTableId2IndexMap(){
@@ -240,6 +255,7 @@ public class TableCutServiceImpl implements TableCutService {
             tableId2IndexMap.put(tableList1.get(i).getId(), i);
         }
     }
+
 
     /**
      * 获取最终结果
