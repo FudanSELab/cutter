@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
     double[][] G;
     int k = 0;
+    Map<Integer, ArrayList<Cluster>> allResults;
 
     public GirvanNewmanAlgorithm(double[][] G){
         this.G = G;
@@ -44,8 +45,8 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
             nodeList.add(createNode(model, graph));
         }
         for(int i = 0; i < G.length; i++){
-            for(int j = 0; j < G.length; j++){
-                if(i != j && G[i][j] >0){
+            for(int j = i+1; j < G.length; j++){
+                if(G[i][j] > 0){
                     createEdge(model, graph, nodeList.get(i), nodeList.get(j), (float) G[i][j]);
                 }
             }
@@ -63,6 +64,10 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
             System.out.println(i + ":" + l);
             clusters.put(i, l);
         }
+
+        //获取每一步的分割方案
+        allResults = clusterer.getAllResults();
+
         return clusters;
     }
 
@@ -76,5 +81,21 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
         Node node = model.factory().newNode();
         graph.addNode(node);
         return node;
+    }
+
+    public Map<Integer, Map<Integer, List<Integer>>> getAllResults(){
+        Map<Integer, Map<Integer, List<Integer>>> r = new HashMap<>();
+
+        for(int groupNum: allResults.keySet()){
+            Map<Integer, List<Integer>> m = new HashMap<>();
+            List<Cluster> oneProposal = allResults.get(groupNum);
+            for(int i = 0; i < oneProposal.size(); i++){
+                List<Integer> l = Arrays.stream(oneProposal.get(i).getNodes()).map(n -> n.getId() - 1).collect(Collectors.toList());
+                m.put(i, l);
+            }
+            r.put(groupNum, m);
+        }
+
+        return r;
     }
 }

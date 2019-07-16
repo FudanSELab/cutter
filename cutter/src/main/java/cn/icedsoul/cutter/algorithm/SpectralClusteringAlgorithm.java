@@ -23,8 +23,8 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
         for(int i = 0; i < n; i++){
             for(int j = i + 1; j < n; j++){
                 if(G[i][j] == 0){
-                    G[i][j] = 0.1;
-                    G[j][i] = 0.1;
+                    G[i][j] = 0.000001;
+                    G[j][i] = 0.000001;
                 }
             }
         }
@@ -32,11 +32,12 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
 
     @Override
     public Map<Integer, List<Integer>> calculate() {
+        // 不能有孤立的点
         preProcess();
         Map<Integer, List<Integer>> clusters = new HashMap<>();
 
         if(null == G || k > G.length) return clusters;
-        printG(G);
+//        printG(G);
         SpectralClustering sc = new SpectralClustering(G, k);
         for(int i = 0; i < sc.getNumClusters(); i ++){
             clusters.put(i, new ArrayList<>());
@@ -51,15 +52,15 @@ public class SpectralClusteringAlgorithm implements CutGraphAlgorithm {
     }
 
 
-    private void printG(double[][] G){
-        int n = G.length;
-        System.out.println("---邻接矩阵------");
-        for(int i = 0; i < n; i++){
-            for(int j = 0; j < n;j++){
-                System.out.print(G[i][j] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("----------------");
-    }
+//    private void printG(double[][] G){
+//        int n = G.length;
+//        System.out.println("---邻接矩阵------");
+//        for(int i = 0; i < n; i++){
+//            for(int j = 0; j < n;j++){
+//                System.out.print(G[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println("----------------");
+//    }
 }

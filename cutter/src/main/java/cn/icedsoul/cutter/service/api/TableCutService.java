@@ -1,11 +1,19 @@
 package cn.icedsoul.cutter.service.api;
 
+import cn.icedsoul.cutter.domain.po.Table;
+
 import java.util.List;
 import java.util.Map;
 
 public interface TableCutService {
 
-    Map<Integer, List<String>> cutTable(int k);
+    //Cut tables and then extract tables that sharing degree are high
+    Map<Integer, List<Table>> cutTable(int k);
 
-//    Map<Integer, List<String>> communityDetection();
+    //Extract tables that sharing degree are high and then cut table
+    Map<Integer, List<Table>> cutTable2(int k);
+
+    //Adjust the weight of tables that have high sharing degree and then cut table
+    Map<Integer, List<Table>> cutTable3(int k);
+
 }
