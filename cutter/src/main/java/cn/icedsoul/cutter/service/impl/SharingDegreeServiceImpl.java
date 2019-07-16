@@ -8,6 +8,7 @@ import cn.icedsoul.cutter.repository.MethodCallRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
 import cn.icedsoul.cutter.service.api.SharingDegreeService;
+import cn.icedsoul.cutter.service.api.WeightCalculationService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,11 +23,15 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
 
     @Autowired
     TableRepository tableRepository;
+
     @Autowired
     MethodCallRepository methodCallRepository;
 
     @Autowired
     SqlRepository sqlRepository;
+
+    @Autowired
+    WeightCalculationService weightCalculationService;
 
     Map<String, Double> ssdMap = new HashMap();
     Map<String, Double> msdMap = new HashMap();
@@ -152,7 +157,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         });
         Collections.sort(shareTables);
         for(ShareTable shareTable : shareTables){
-            log.info(shareTable.getTable().getTableName() + " " + shareTable.getSqlShare() + " " + shareTable.getCTraceTypeShare() + " " + shareTable.getScenarioShare());
+            log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.1 + shareTable.getCTraceTypeShare() * 0.5  + shareTable.getScenarioShare()));
         }
         int number = (int) Math.ceil( (double)k * 0.4);
         List<Set<ShareTable>> group = new ArrayList<>();
@@ -195,56 +200,13 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
 
 
     private boolean similar(Table a, Table b){
-        int aSqlNum = 0, bSqlNum = 0, abSqlNum = 0;
-        for(Long sqlId : a.getAppearSql()){
-            Sql sql = sqlRepository.findById(sqlId).get();
-            if(sql.getTables().size() > 1){
-                aSqlNum += 1;
-            }
-        }
-        for(Long sqlId: b.getAppearSql()){
-            Sql sql = sqlRepository.findById(sqlId).get();
-            if(sql.getTables().size() > 1){
-                bSqlNum += 1;
-            }
-        }
-        for(Long aSqlId : a.getAppearSql()){
-            for(Long bSqlId : b.getAppearSql()){
-                if(aSqlId.equals(bSqlId)){
-                    abSqlNum++;
-                }
-            }
-        }
-
-        int aTraceNum, bTraceNum, abTraceNum = 0;
-        for(Long aTraceId : a.getAppearTrace()){
-            for(Long bTraceId : b.getAppearTrace()){
-                if(aTraceId.equals(bTraceId)){
-                    abTraceNum++;
-                }
-            }
-        }
-        aTraceNum = a.getAppearTrace().size();
-        bTraceNum = b.getAppearTrace().size();
-        double aToBSqlSimilar = 0.0;
-        double bToASqlSimilar = 0.0;
-        double aToBTraceSimilar = 0.0;
-        double bToATraceSimilar = 0.0;
-        if(aSqlNum != 0) {
-            aToBSqlSimilar = (double) abSqlNum / aSqlNum;
-        }
-        if(bSqlNum != 0) {
-            bToASqlSimilar = (double) abSqlNum / bSqlNum;
-        }
-        if(aTraceNum != 0) {
-            aToBTraceSimilar = (double) abTraceNum / aTraceNum;
-        }
-        if(bTraceNum != 0) {
-            bToATraceSimilar = (double) abTraceNum / bTraceNum;
-        }
-        log.info(a.getTableName() + " " + b.getTableName() + ": " + aToBSqlSimilar + " " + bToASqlSimilar + " " + aToBTraceSimilar + " " + bToATraceSimilar);
+        TwoWayRelation sqlTwoWayRelation = weightCalculationService.calculateSqlSimilar(a, b);
+        TwoWayRelation traceTwoWayRelation = weightCalculationService.calculateTraceSimilar(a, b);
+        TwoWayRelation scenarioTwoWayRelation = weightCalculationService.calculateScenarioSimilar(a, b);
+//        log.info(a.getTableName() + " " + b.getTableName() + ": " + sqlTwoWayRelation.getAToB() + " " + sqlTwoWayRelation.getBToA() + " " + aToBTraceSimilar + " " + bToATraceSimilar);
         //TODO 优化
-        boolean isSimilar = (aToBSqlSimilar >= 0.8 || bToASqlSimilar >= 0.8) && (aToBTraceSimilar >= 0.8 || bToATraceSimilar >= 0.8);
+        boolean isSimilar = (sqlTwoWayRelation.getAToB() >= 0.8 || sqlTwoWayRelation.getBToA() >= 0.8) &&
+                (traceTwoWayRelation.getAToB() >= 0.8 || traceTwoWayRelation.getBToA() >= 0.8);
         return isSimilar;
     }
 

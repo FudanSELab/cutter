@@ -39,12 +39,12 @@ public class TableCutServiceImpl implements TableCutService {
          printG(G);
 
         if(null != G){
-//            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
+            CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
 //            CutGraphAlgorithm cutGraphAlgorithm = new AsymmetricKMeansAlgorithm(G, k);
 //            CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
 //            CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
 //            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
-            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//            CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
             clusters = cutGraphAlgorithm.calculate();
             return translateClusters(clusters);
         }

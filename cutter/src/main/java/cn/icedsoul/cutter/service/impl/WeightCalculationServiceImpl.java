@@ -1,5 +1,6 @@
 package cn.icedsoul.cutter.service.impl;
 
+import cn.icedsoul.cutter.domain.bo.TwoWayRelation;
 import cn.icedsoul.cutter.domain.po.Sql;
 import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.relation.CloseTo;
@@ -82,6 +83,19 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
     }
 
     private List<Double> calculateSimilar(Table a, Table b){
+        Double sqlSimilar = calculateSqlSimilarWithWeight(a, b);
+        Double traceSimilar = calculateTraceSimilarWithWeight(a, b);
+        Double scenarioSimilar = calculateScenarioSimilarWithWeight(a, b);
+        List<Double> result = new ArrayList<>();
+        log.info(String.format("%s %s : %.2f %.2f %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
+        result.add(sqlSimilar);
+        result.add(traceSimilar);
+        result.add(scenarioSimilar);
+        return result;
+    }
+
+    @Override
+    public Double calculateSqlSimilarWithWeight(Table a, Table b){
         Double aSqlNum = 0.0, bSqlNum = 0.0, abSqlNum = 0.0;
         for(Long aSqlId : a.getAppearSql()){
             for(Long bSqlId : b.getAppearSql()){
@@ -94,7 +108,12 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             aSqlNum += sqlWeight.get(aSqlId);
         }
+        Double sqlSimilar = abSqlNum / (aSqlNum + bSqlNum - abSqlNum);
+        return  sqlSimilar;
+    }
 
+    @Override
+    public Double calculateTraceSimilarWithWeight(Table a, Table b){
         Double aTraceNum = 0.0, bTraceNum = 0.0, abTraceNum = 0.0;
         for(Long aTraceId : a.getAppearTrace()){
             for(Long bTraceId : b.getAppearTrace()){
@@ -107,6 +126,12 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             aTraceNum += traceWeight.get(aTraceId);
         }
+        Double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
+        return  traceSimilar;
+    }
+
+    @Override
+    public Double calculateScenarioSimilarWithWeight(Table a, Table b){
         Double aScenarioNum = 0.0, bScenarioNum = 0.0, abScenarioNum = 0.0;
         for(String aScenarioId : a.getAppearScenario()){
             for(String bScenarioId : b.getAppearScenario()){
@@ -119,16 +144,71 @@ public class WeightCalculationServiceImpl implements WeightCalculationService {
             }
             aScenarioNum += scenarioWeight.get(aScenarioId);
         }
-        Double sqlSimilar = abSqlNum / (aSqlNum + bSqlNum - abSqlNum);
-        Double traceSimilar = abTraceNum / (aTraceNum + bTraceNum - abTraceNum);
         Double scenarioSimilar = abScenarioNum / (aScenarioNum + bScenarioNum - abScenarioNum);
-        List<Double> result = new ArrayList<>();
-//        log.info(String.format("%f %f %f %f %f %f %f %f %f", aSqlNum, bSqlNum, abSqlNum, aTraceNum, bTraceNum, abTraceNum, aScenarioNum, bScenarioNum, abScenarioNum));
-        log.info(String.format("%s %s : %.2f %.2f %.2f", a.getTableName(), b.getTableName(), sqlSimilar, traceSimilar, scenarioSimilar));
-        result.add(sqlSimilar);
-        result.add(traceSimilar);
-        result.add(scenarioSimilar);
-        return result;
+        return  scenarioSimilar;
+    }
+
+    @Override
+    public TwoWayRelation calculateSqlSimilar(Table a, Table b){
+        int abSqlNum = 0;
+//        for(Long sqlId : a.getAppearSql()){
+//            Sql sql = sqlRepository.findById(sqlId).get();
+//            if(sql.getTables().size() > 1){
+//                aSqlNum += 1;
+//            }
+//        }
+//        for(Long sqlId: b.getAppearSql()){
+//            Sql sql = sqlRepository.findById(sqlId).get();
+//            if(sql.getTables().size() > 1){
+//                bSqlNum += 1;
+//            }
+//        }
+        for(Long aSqlId : a.getAppearSql()){
+            for(Long bSqlId : b.getAppearSql()){
+                if(aSqlId.equals(bSqlId)){
+                    abSqlNum++;
+                }
+            }
+        }
+        return getTwoWayRelation(a.getAppearSql().size(), b.getAppearSql().size(), abSqlNum);
+    }
+
+    @Override
+    public TwoWayRelation calculateTraceSimilar(Table a, Table b){
+        int abTraceNum = 0;
+        for(Long aTraceId : a.getAppearTrace()){
+            for(Long bTraceId : b.getAppearTrace()){
+                if(aTraceId.equals(bTraceId)){
+                    abTraceNum++;
+                }
+            }
+        }
+        return getTwoWayRelation(a.getAppearTrace().size(), b.getAppearTrace().size(), abTraceNum);
+    }
+
+    @Override
+    public TwoWayRelation calculateScenarioSimilar(Table a, Table b){
+        int abScenario = 0;
+        for(String aScenarioId : a.getAppearScenario()){
+            for(String bScenarioId : b.getAppearScenario()){
+                if(aScenarioId.equals(bScenarioId)){
+                    abScenario++;
+                }
+            }
+        }
+        return getTwoWayRelation(a.getAppearScenario().size(), b.getAppearScenario().size(), abScenario);
+    }
+
+    private TwoWayRelation getTwoWayRelation(int aNum, int bNum, int abNum){
+        double aToBSimilar = 0.0;
+        double bToASimilar = 0.0;
+        if(aNum != 0) {
+            aToBSimilar = (double) abNum / aNum;
+        }
+        if(bNum != 0) {
+            bToASimilar = (double) abNum / bNum;
+        }
+        return new TwoWayRelation(aToBSimilar, bToASimilar);
     }
 
     @Override
