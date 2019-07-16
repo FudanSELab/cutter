@@ -75,7 +75,7 @@ public class TableCutServiceImpl implements TableCutService {
         printG(G);
         Map<Integer, List<Table>> result  = new HashMap<>();
 
-        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate();
         Set<Integer> sharingTableIndexes = new HashSet<>();
         int groupNum = 1;
         System.out.println("---共享度高------");
@@ -134,7 +134,7 @@ public class TableCutServiceImpl implements TableCutService {
 
         Map<Integer, List<Table>> result  = new HashMap<>();
         //调整共享度高的表的边权重
-        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate();
         List<List<Table>> tables = shareTableToTable(sharingClusters);
         adjustWeightforSharing(tables);
 

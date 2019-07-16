@@ -64,7 +64,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
     }
 
     @Override
-    public List<Set<ShareTable>> shareCalculate(int k) {
+    public List<Set<ShareTable>> shareCalculate() {
 
         int scenarioNum = methodCallRepository.countScenarioNum();
         int moduleNum = methodCallRepository.countModuleNum();
@@ -157,9 +157,10 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         });
         Collections.sort(shareTables);
         for(ShareTable shareTable : shareTables){
-            log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.1 + shareTable.getCTraceTypeShare() * 0.5  + shareTable.getScenarioShare()));
+            log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.5 + shareTable.getCTraceTypeShare() * 0.8  + shareTable.getScenarioShare()));
+//            log.info(shareTable.getTable().getTableName() + " " + shareTable.getSqlShare() + " " + shareTable.getCTraceTypeShare() + " " + shareTable.getScenarioShare());
         }
-        int number = (int) Math.ceil( (double)k * 0.4);
+        int number = shareTableCount(shareTables.size());
         List<Set<ShareTable>> group = new ArrayList<>();
         for(int i = 0; i < number; i++){
             Set<ShareTable> set = new HashSet<>();
@@ -198,15 +199,34 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         return group;
     }
 
+    private int shareTableCount(int tableCount){
+        if(tableCount > 150){
+            return (int) Math.ceil(tableCount * 0.08);
+        }
+        //拟合曲线
+        return (int) Math.ceil(tableCount * (-2.648790319632655 * Math.pow(10, -12) * Math.pow(tableCount, 6) + 1.2157745273003864 * Math.pow(10, -9) * Math.pow(tableCount, 5) - 2.1024376321144118 * Math.pow(10, -7) * Math.pow(tableCount, 4)+ 0.000016781858324772667 * Math.pow(tableCount, 3) - 0.0005827489400527467 * Math.pow(tableCount, 2)+ 0.003528621097963147 * tableCount+ 0.3081903336705743));
+    }
+
 
     private boolean similar(Table a, Table b){
         TwoWayRelation sqlTwoWayRelation = weightCalculationService.calculateSqlSimilar(a, b);
         TwoWayRelation traceTwoWayRelation = weightCalculationService.calculateTraceSimilar(a, b);
-        TwoWayRelation scenarioTwoWayRelation = weightCalculationService.calculateScenarioSimilar(a, b);
-//        log.info(a.getTableName() + " " + b.getTableName() + ": " + sqlTwoWayRelation.getAToB() + " " + sqlTwoWayRelation.getBToA() + " " + aToBTraceSimilar + " " + bToATraceSimilar);
-        //TODO 优化
-        boolean isSimilar = (sqlTwoWayRelation.getAToB() >= 0.8 || sqlTwoWayRelation.getBToA() >= 0.8) &&
-                (traceTwoWayRelation.getAToB() >= 0.8 || traceTwoWayRelation.getBToA() >= 0.8);
+//        TwoWayRelation scenarioTwoWayRelation = weightCalculationService.calculateScenarioSimilar(a, b);
+        log.info(a.getTableName() + " " + b.getTableName() + ": " + sqlTwoWayRelation.getAToB() + " " + sqlTwoWayRelation.getBToA() + " " +
+                traceTwoWayRelation.getAToB() + " " + traceTwoWayRelation.getBToA());
+        boolean isSimilar = false;
+//      SQL级别相似
+        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() > 1.4){
+            isSimilar = true;
+        }
+//      Trace级别相似
+        if(traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 1.6){
+            isSimilar = true;
+        }
+//      整体相似
+        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.4){
+            isSimilar = true;
+        }
         return isSimilar;
     }
 

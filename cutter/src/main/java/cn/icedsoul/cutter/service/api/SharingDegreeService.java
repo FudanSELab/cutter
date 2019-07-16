@@ -10,5 +10,5 @@ public interface SharingDegreeService {
 
     void calculateSharingDegree();
 
-    List<Set<ShareTable>> shareCalculate(int k);
+    List<Set<ShareTable>> shareCalculate();
 }
