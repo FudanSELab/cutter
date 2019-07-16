@@ -43,6 +43,7 @@ public class TableCutServiceImpl implements TableCutService {
     //返回的最优解,groupNum -> group中的所有表的index
     Map<Integer, List<Integer>> clusters;
 
+
     @Override
     public Map<Integer, List<Table>> cutTable(int k) {
          generateGraph();
@@ -53,8 +54,8 @@ public class TableCutServiceImpl implements TableCutService {
 //        CutGraphAlgorithm cutGraphAlgorithm = new MCLClusteringAlgorithm(G);
 //        CutGraphAlgorithm cutGraphAlgorithm = new FastNewmanAlgothrim(G, k);
 //        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G, k);
-//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
-        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
         clusters = cutGraphAlgorithm.calculate();
 
         Map<Integer, List<Table>> result = new HashMap<>();
@@ -108,9 +109,9 @@ public class TableCutServiceImpl implements TableCutService {
         System.out.println("-----GwithoutShare---");
         printG(GwithoutShare);
 
-//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(GwithoutShare);
+        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(GwithoutShare);
 //        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(GwithoutShare, k);
-        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(GwithoutShare);
+//        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(GwithoutShare);
         clusters = cutGraphAlgorithm.calculate();
 
         //转换拆分结果
@@ -124,20 +125,84 @@ public class TableCutServiceImpl implements TableCutService {
     }
 
 
+
     @Override
     //Adjust the weight of tables that have high sharing degree and then cut table
     public Map<Integer, List<Table>> cutTable3(int k) {
         generateGraph();
-
         printG(G);
-        Map<Integer, List<Table>> result  = new HashMap<>();
 
+        Map<Integer, List<Table>> result  = new HashMap<>();
         //调整共享度高的表的边权重
         List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
-        for(Set<ShareTable> sc: sharingClusters){
+        List<List<Table>> tables = shareTableToTable(sharingClusters);
+        adjustWeightforSharing(tables);
+
+        //切图
+        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+        clusters = cutGraphAlgorithm.calculate();
+//        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
+//        clusters = cutGraphAlgorithm.calculate();
+
+        //转换拆分结果
+        translateResult(clusters, result, 1, tableList1);
+
+        //打印聚类过程和每一步的拆分代价
+//        Map<Integer, Map<Integer, List<Integer>>> process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
+//        clusteringProcess(process);
+
+        return result;
+    }
+
+    //将ShareTable转化为Table
+    private List<List<Table>> shareTableToTable(List<Set<ShareTable>> shareTables){
+        List<List<Table>> result = new ArrayList<>();
+        for(Set<ShareTable> sts: shareTables){
+            List<Table> list = new ArrayList<>();
+            for(ShareTable st: sts){
+                list.add(st.getTable());
+            }
+        }
+        return result;
+    }
+
+
+    ////////////////////////网页用到的接口///////////////////////////////////////////////////
+
+    //使用前台传的共享表,目前使用的是削减矩阵的权重
+    @Override
+    public Map<Integer, List<Table>> realCut(int k, List<List<Table>> sharingClusters) {
+        generateGraph();
+        printG(G);
+
+        Map<Integer, List<Table>> result  = new HashMap<>();
+        //调整共享度高的表的边权重
+        adjustWeightforSharing(sharingClusters);
+        //切图
+        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
+//        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
+        clusters = cutGraphAlgorithm.calculate();
+//        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
+//        clusters = cutGraphAlgorithm.calculate();
+
+        //转换拆分结果
+        translateResult(clusters, result, 1, tableList1);
+
+        //打印聚类过程和每一步的拆分代价
+//        Map<Integer, Map<Integer, List<Integer>>> process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
+//        clusteringProcess(process);
+
+        return result;
+    }
+
+
+    //根据共享度高的表调整已有矩阵
+    private void adjustWeightforSharing(List<List<Table>> sharingClusters){
+        for(List<Table> sc: sharingClusters){
             Set<Integer> indexes = new HashSet<>();
-            for(ShareTable st: sc){
-                indexes.add(tableId2IndexMap.get(st.getTable().getId()));
+            for(Table st: sc){
+                indexes.add(tableId2IndexMap.get(st.getId()));
             }
             System.out.println("高共享度group:" + indexes);
             //group里面的两table之间边不变，其他的与该group中table两连的边权重减为原来的20%
@@ -155,26 +220,11 @@ public class TableCutServiceImpl implements TableCutService {
                 }
             }
         }
-
         System.out.println("----Graph after adjusting weight-----");
         printG(G);
-
-        //切图
-//        CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
-        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
-        clusters = cutGraphAlgorithm.calculate();
-//        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
-//        clusters = cutGraphAlgorithm.calculate();
-
-        //转换拆分结果
-        translateResult(clusters, result, 1, tableList1);
-
-        //打印聚类过程和每一步的拆分代价
-//        Map<Integer, Map<Integer, List<Integer>>> process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
-//        clusteringProcess(process);
-
-        return result;
     }
+
+    /////////////////////////////////////////////////////////////////////
 
     //打印聚类的过程和每次迭代的拆分代价
     private void clusteringProcess(Map<Integer, Map<Integer, List<Integer>>> process){
@@ -275,6 +325,7 @@ public class TableCutServiceImpl implements TableCutService {
         return result;
     }
 
+    ////////////////////打印辅助类//////////////////////////////
     private void printG(double[][] G){
         int n = G.length;
         for(int i = 0; i < n; i++){
