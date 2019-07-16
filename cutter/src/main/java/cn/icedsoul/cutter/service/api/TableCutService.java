@@ -1,9 +1,11 @@
 package cn.icedsoul.cutter.service.api;
 
+import cn.icedsoul.cutter.domain.bo.ShareTable;
 import cn.icedsoul.cutter.domain.po.Table;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface TableCutService {
 
@@ -15,5 +17,7 @@ public interface TableCutService {
 
     //Adjust the weight of tables that have high sharing degree and then cut table
     Map<Integer, List<Table>> cutTable3(int k);
+
+    Map<Integer, List<Table>> realCut(int k, List<List<Table>> sharingClusters);
 
 }

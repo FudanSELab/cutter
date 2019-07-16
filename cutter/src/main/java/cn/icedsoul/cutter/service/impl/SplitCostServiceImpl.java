@@ -1,5 +1,7 @@
 package cn.icedsoul.cutter.service.impl;
 
+import cn.icedsoul.cutter.domain.bo.SplitCost;
+import cn.icedsoul.cutter.domain.bo.SplitProposal;
 import cn.icedsoul.cutter.domain.po.Method;
 import cn.icedsoul.cutter.domain.po.Sql;
 import cn.icedsoul.cutter.domain.po.Table;
@@ -34,14 +36,30 @@ public class SplitCostServiceImpl implements SplitCostService {
     Map<Method, Set<Integer>> methodToSplit ;
     Map<Class, Set<Integer>> classToSplit ;
 
+    Map<String, Set<Integer>> sqlToSplitResult ;
+    Map<String, Set<Integer>> methodToSplitResult ;
+    Map<String, Set<Integer>> classToSplitResult ;
+
+    Map<Integer, Set<Sql>>  groupBySql;
+    Map<Integer, Set<Method>>  groupByMethod;
+    Map<Integer, Set<Class>>  groupByClass;
 
     @Override
-    public int[] getSplitCost(List<List<Long>> tgs) {
+    public SplitCost getSplitCost(List<List<Long>> tgs) {
         //initial work
         sqlToSplit = new HashMap<>();
         methodToSplit = new HashMap<>();
         classToSplit = new HashMap<>();
         tableGroupMap = new HashMap<Long, Integer>();
+
+        groupBySql = new HashMap<>();
+        groupByMethod = new HashMap<>();
+        groupByClass = new HashMap<>();
+
+        sqlToSplitResult = new HashMap<>();
+        methodToSplitResult = new HashMap<>();
+        classToSplitResult = new HashMap<>();
+
         initTableGroupMap(tgs);
 
         Iterator<Sql> sqlIterator = sqlRepository.findAll().iterator();
@@ -49,8 +67,12 @@ public class SplitCostServiceImpl implements SplitCostService {
             Sql sql = sqlIterator.next();
             List<Table> tableList = tableRepository.findTablesBySql(sql.getDatabaseName(), sql.getSql());
             Set<Long> tableIdList = tableList.stream().map(Table::getId).collect(Collectors.toSet());
-            if(tableIdList != null && tableIdList.size()> 1 ){
+            if(tableIdList != null){
                 Set<Integer> cs = getClusterSet(tableIdList);
+                for(int clusterNum: cs){
+                    groupBySql.putIfAbsent(clusterNum, new HashSet<Sql>());
+                    groupBySql.get(clusterNum).add(sql);
+                }
                 if(cs.size() > 1){
                     sqlToSplit.put(sql, cs);
                 }
@@ -61,8 +83,12 @@ public class SplitCostServiceImpl implements SplitCostService {
         while(methodIterator.hasNext()){
             Method method = methodIterator.next();
             Set<Long> tableIdList = method.getTables();
-            if(tableIdList != null && tableIdList.size()> 1){
+            if(tableIdList != null){
                 Set<Integer> cs = getClusterSet(tableIdList);
+                for(int clusterNum: cs){
+                    groupByMethod.putIfAbsent(clusterNum, new HashSet<Method>());
+                    groupByMethod.get(clusterNum).add(method);
+                }
                 if(cs.size() > 1){
                     methodToSplit.put(method, cs);
                 }
@@ -75,6 +101,10 @@ public class SplitCostServiceImpl implements SplitCostService {
             Set<Long> tableIdList = c.getTables();
             if(tableIdList != null && tableIdList.size()> 1){
                 Set<Integer> cs = getClusterSet(tableIdList);
+                for(int clusterNum: cs){
+                    groupByClass.putIfAbsent(clusterNum, new HashSet<Class>());
+                    groupByClass.get(clusterNum).add(c);
+                }
                 if(cs.size() > 1){
                     classToSplit.put(c, cs);
                 }
@@ -83,14 +113,17 @@ public class SplitCostServiceImpl implements SplitCostService {
 
         System.out.println("--sql");
         for(Sql s: sqlToSplit.keySet()){
+            sqlToSplitResult.put(s.getSql(), sqlToSplit.get(s));
             System.out.println("SQL ID [" + s.getId() + "] : " + sqlToSplit.get(s));
         }
         System.out.println("--method");
         for(Method m: methodToSplit.keySet()){
+            methodToSplitResult.put(m.getClassName()+"."+m.getMethodName(), methodToSplit.get(m));
             System.out.println(m.getClassName()+"."+m.getMethodName() + " : " + methodToSplit.get(m));
         }
         System.out.println("--class");
         for(Class s: classToSplit.keySet()){
+            classToSplitResult.put(s.getPackageName()+"."+s.getClassName(), classToSplit.get(s));
             System.out.println(s.getPackageName()+"."+s.getClassName() + " : " + classToSplit.get(s));
         }
         System.out.println("----拆分开销：");
@@ -101,7 +134,15 @@ public class SplitCostServiceImpl implements SplitCostService {
         //0:sqlNumToSplit 1:methodNumToSplit 2:classNumToSplit
         int[] result = new int[]{sqlToSplit.size(), methodToSplit.size(),classToSplit.size()};
 
-        return result;
+        SplitCost cost = new SplitCost(result, sqlToSplitResult, methodToSplitResult, classToSplitResult);
+
+        return cost;
+    }
+
+    @Override
+    public SplitProposal getCodeSplitProposal() {
+        SplitProposal sp = new SplitProposal(groupBySql, groupByMethod, groupByClass);
+        return sp;
     }
 
 
@@ -111,7 +152,9 @@ public class SplitCostServiceImpl implements SplitCostService {
         for(int i = 0; i < tableGroups.size(); i++){
             List<Long> list = tableGroups.get(i);
             for(Long l: list){
-                tableGroupMap.put(l,i);
+//                tableGroupMap.put(l,i);
+                //groupNum从1开始，所以index+1
+                tableGroupMap.put(l,i + 1);
             }
         }
     }

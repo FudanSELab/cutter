@@ -1,9 +1,14 @@
 package cn.icedsoul.cutter.service.api;
 
+import cn.icedsoul.cutter.domain.bo.SplitCost;
+import cn.icedsoul.cutter.domain.bo.SplitProposal;
+
 import java.util.List;
 
 public interface SplitCostService {
 
-    int[] getSplitCost(List<List<Long>> tableGroups);
+    SplitCost getSplitCost(List<List<Long>> tableGroups);
+
+    SplitProposal getCodeSplitProposal();
 
 }
