@@ -28,9 +28,11 @@ public class ShareTable implements Comparable<ShareTable>{
     @Override
     public int compareTo(ShareTable o) {
         //TODO 优化
-        if (this.scenarioShare + 0.5 * this.cTraceTypeShare + 0.1 * this.sqlShare < o.getScenarioShare() + 0.5 * o.getCTraceTypeShare() + 0.1 * o.getSqlShare()){
+        if (this.scenarioShare + 0.8 * this.cTraceTypeShare + 0.5 * this.sqlShare < o.getScenarioShare() + 0.5 * o.getCTraceTypeShare() + 0.1 * o.getSqlShare()){
             return 1;
         }
         return -1;
     }
+
+
 }

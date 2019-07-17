@@ -41,7 +41,7 @@ public class CutterController {
     @Autowired
     SplitCostService splitCostService;
 
-    //测试完后才能需要移除
+    //测试完后才能移除
     @Autowired
     CloseToRepository closeToRepository;
     @Autowired
@@ -116,7 +116,7 @@ public class CutterController {
     @ApiOperation(value = "Cut table", notes = "Cut tables and then extract tables that sharing degree are high")
     public SplitResult cutTable(@RequestParam("k") int k){
         Map<Integer, List<Table>> cutClusters = tableCutService.cutTable(k);
-        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate(12);
+        List<Set<ShareTable>> sharingClusters = sharingDegreeService.shareCalculate();
 
         Map<Integer, List<Table>> proposal  = new HashMap<>();
         int i = 1;
@@ -174,8 +174,8 @@ public class CutterController {
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/share")
     @ApiOperation(value = "share", notes = "share")
-    public List<List<Table>> calShare(@RequestParam("k") int k){
-        List<Set<ShareTable>> shareTables = sharingDegreeService.shareCalculate(k);
+    public List<List<Table>> calShare(){
+        List<Set<ShareTable>> shareTables = sharingDegreeService.shareCalculate();
         //将ShareTable转化为Table
         List<List<Table>> result = shareTableToTable(shareTables);
         return result;
