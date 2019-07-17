@@ -189,6 +189,7 @@ public class CutterController {
             for(ShareTable st: sts){
                 list.add(st.getTable());
             }
+            result.add(list);
         }
         return result;
     }
