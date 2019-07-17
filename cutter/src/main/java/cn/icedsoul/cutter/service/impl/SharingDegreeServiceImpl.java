@@ -157,8 +157,8 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         });
         Collections.sort(shareTables);
         for(ShareTable shareTable : shareTables){
-            log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.5 + shareTable.getCTraceTypeShare() * 0.8  + shareTable.getScenarioShare()));
-//            log.info(shareTable.getTable().getTableName() + " " + shareTable.getSqlShare() + " " + shareTable.getCTraceTypeShare() + " " + shareTable.getScenarioShare());
+            log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.2 + shareTable.getCTraceTypeShare() * 0.8  + shareTable.getScenarioShare()));
+            log.info(shareTable.getTable().getTableName() + " " + shareTable.getSqlShare() + " " + shareTable.getCTraceTypeShare() + " " + shareTable.getScenarioShare());
         }
         int number = shareTableCount(shareTables.size());
         List<Set<ShareTable>> group = new ArrayList<>();
