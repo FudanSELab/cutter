@@ -163,6 +163,7 @@ public class TableCutServiceImpl implements TableCutService {
             for(ShareTable st: sts){
                 list.add(st.getTable());
             }
+            result.add(list);
         }
         return result;
     }
