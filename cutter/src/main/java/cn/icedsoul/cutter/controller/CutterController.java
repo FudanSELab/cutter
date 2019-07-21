@@ -1,9 +1,6 @@
 package cn.icedsoul.cutter.controller;
 
-import cn.icedsoul.cutter.domain.bo.ShareTable;
-import cn.icedsoul.cutter.domain.bo.SplitCost;
-import cn.icedsoul.cutter.domain.bo.SplitProposal;
-import cn.icedsoul.cutter.domain.bo.SplitResult;
+import cn.icedsoul.cutter.domain.bo.*;
 import cn.icedsoul.cutter.domain.po.Table;
 import cn.icedsoul.cutter.repository.CloseToRepository;
 import cn.icedsoul.cutter.repository.MethodRepository;
@@ -68,16 +65,12 @@ public class CutterController {
         weightCalculationService.addSimilarWeight();
     }
 
-    @CrossOrigin(origins = "*")
-    @PostMapping(value = "/realCut")
-    @ApiOperation(value = "Real Cut", notes = "Real Cut")
-    //根据外面传过来的共享度高的表做切分
-    public SplitResult realCut(@RequestParam("k") int k, @RequestParam("sharingClusters") List<List<Table>> sharingClusters){
-        Map<Integer, List<Table>> proposal = tableCutService.realCut(k, sharingClusters);
-        //calculate split cost
-        SplitCost cost = calculateSplitCost(proposal);
-        SplitResult result = new SplitResult(proposal, cost);
 
+
+    private SplitResult composeSplitResult(Map<Integer, List<Table>> proposal){
+        SplitCost cost = calculateSplitCost(proposal);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
         return result;
     }
 
@@ -88,7 +81,8 @@ public class CutterController {
         Map<Integer, List<Table>> proposal = tableCutService.cutTable3(k);
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
-        SplitResult result = new SplitResult(proposal, cost);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
 
         return result;
     }
@@ -106,8 +100,8 @@ public class CutterController {
 
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
-
-        SplitResult result = new SplitResult(proposal, cost);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
         return result;
     }
 
@@ -149,36 +143,95 @@ public class CutterController {
 
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
-
-        SplitResult result = new SplitResult(proposal, cost);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
         return result;
+    }
+
+
+    /////////////////////////////web page用到的接口////////////////////////////////////////////
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/realCut")
+    @ApiOperation(value = "Real Cut", notes = "Real Cut")
+    //根据外面传过来的共享度高的表做切分
+    public SplitResult realCut(@RequestBody List<List<Table>> sharingTableGroups){
+        int k = 0;
+        Map<Integer, List<Table>> proposal = tableCutService.realCut(k, sharingTableGroups);
+        SplitCost cost = calculateSplitCost(proposal);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
+        return result;
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/addService")
+    @ApiOperation(value = "Add Service", notes = "Add Service")
+    //增加服务数量，即划分粒度变小
+    public SplitResult addService(@RequestBody int lastServiceNum){
+        Map<Integer, List<Table>> proposal = tableCutService.addService(lastServiceNum);
+        return composeSplitResult(proposal);
+    }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/reduceService")
+    @ApiOperation(value = "Reduce Service", notes = "Reduce Service")
+    //增加服务数量，即划分粒度变大
+    public SplitResult reduceService(@RequestBody int lastServiceNum){
+        Map<Integer, List<Table>> proposal = tableCutService.reduceService(lastServiceNum);
+        return composeSplitResult(proposal);
     }
 
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/splitCost")
     @ApiOperation(value = "split cost", notes = "split cost")
-    public SplitCost splitCost(@RequestParam("idList") List<List<Long>> idList){
+    public SplitCost splitCost(@RequestBody List<List<Long>> idList){
         return splitCostService.getSplitCost(idList);
     }
 
     @CrossOrigin(origins = "*")
-    @PostMapping(value = "/splitProposal")
-    @ApiOperation(value = "split proposal", notes = "split proposal")
+    @GetMapping(value = "/splitDetail")
+    @ApiOperation(value = "split detail", notes = "split detail")
     //总体的代码拆分指导，包含了不拆分的代码归属
     //要在调用了splitCost之后使用
-    public SplitProposal splitProposal(@RequestParam("idList") List<List<Long>> idList){
-        return splitCostService.getCodeSplitProposal();
+    public SplitDetail splitDetail(){
+        return splitCostService.getCodeSplitDetail();
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/splitDetailTree")
+    @ApiOperation(value = "split detail tree", notes = "split detail tree")
+    //总体的代码拆分指导，树形结构，包含了不拆分的代码归属
+    //要在调用了splitCost之后使用!!!!
+    public Map<Integer, List<SplitNode>> splitDetailTree(){
+        return splitCostService.getCodeSplitDetailTree();
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/noTableTree")
+    @ApiOperation(value = "return all methods and classes that not related to a table", notes = "no table tree")
+    //没有和任何数据表相关联的类和方法
+    //要在调用了splitCost之后使用!!!!
+    public List<SplitNode> getNoTableTree(){
+        return splitCostService.getNoTableTree();
     }
 
 
     @CrossOrigin(origins = "*")
-    @PostMapping(value = "/share")
+    @GetMapping(value = "/share")
     @ApiOperation(value = "share", notes = "share")
     public List<List<Table>> calShare(){
         List<Set<ShareTable>> shareTables = sharingDegreeService.shareCalculate();
         //将ShareTable转化为Table
         List<List<Table>> result = shareTableToTable(shareTables);
         return result;
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/allTables")
+    @ApiOperation(value = "Get All Tables", notes = "Get All Tables")
+    public List<Table> allTables(){
+        List<Table> tableList = (List)tableRepository.findAll();
+        return tableList;
     }
 
     //将ShareTable转化为Table
@@ -192,14 +245,6 @@ public class CutterController {
             result.add(list);
         }
         return result;
-    }
-
-    @CrossOrigin(origins = "*")
-    @GetMapping(value = "/allTables")
-    @ApiOperation(value = "Get All Tables", notes = "Get All Tables")
-    public List<Table> allTables(){
-        List<Table> tableList = (List)tableRepository.findAll();
-        return tableList;
     }
 
     //calculate split cost

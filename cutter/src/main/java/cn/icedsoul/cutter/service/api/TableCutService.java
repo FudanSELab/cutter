@@ -20,4 +20,12 @@ public interface TableCutService {
 
     Map<Integer, List<Table>> realCut(int k, List<List<Table>> sharingClusters);
 
+    Map<Integer, List<Table>> addService(int lastServiceNum);
+
+    Map<Integer, List<Table>> reduceService(int lastServiceNum);
+
+    int getCurServiceNum();
+
+    int getMaxServiceNum();
+
 }

@@ -11,9 +11,9 @@ import java.util.Map;
 public class SplitCost {
 
     private int[] splitNum;//0：sqlNum, 1:methodNum, 2:classNum
-    private Map sqlToSplit = new HashMap<>();
-    private Map methodToSplit = new HashMap<>();
-    private Map classToSplit = new HashMap<>();
+    private Map sqlToSplitResult = new HashMap<>();
+    private Map methodToSplitResult = new HashMap<>();
+    private Map classToSplitResult = new HashMap<>();
 
     public int[] getSplitNum() {
         return splitNum;
@@ -23,28 +23,28 @@ public class SplitCost {
         this.splitNum = splitNum;
     }
 
-    public Map getSqlToSplit() {
-        return sqlToSplit;
+    public Map getSqlToSplitResult() {
+        return sqlToSplitResult;
     }
 
-    public void setSqlToSplit(Map sqlToSplit) {
-        this.sqlToSplit = sqlToSplit;
+    public void setSqlToSplitResult(Map sqlToSplitResult) {
+        this.sqlToSplitResult = sqlToSplitResult;
     }
 
-    public Map getMethodToSplit() {
-        return methodToSplit;
+    public Map getMethodToSplitResult() {
+        return methodToSplitResult;
     }
 
-    public void setMethodToSplit(Map methodToSplit) {
-        this.methodToSplit = methodToSplit;
+    public void setMethodToSplitResult(Map methodToSplitResult) {
+        this.methodToSplitResult = methodToSplitResult;
     }
 
-    public Map getClassToSplit() {
-        return classToSplit;
+    public Map getClassToSplitResult() {
+        return classToSplitResult;
     }
 
-    public void setClassToSplit(Map classToSplit) {
-        this.classToSplit = classToSplit;
+    public void setClassToSplitResult(Map classToSplitResult) {
+        this.classToSplitResult = classToSplitResult;
     }
 
 }

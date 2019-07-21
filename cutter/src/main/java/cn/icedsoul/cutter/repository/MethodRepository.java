@@ -47,4 +47,12 @@ public interface MethodRepository extends Neo4jRepository<Method, Long> {
             "where a.methodName='Entry'" +
             "return a")
     List<Method> findEntry();
+
+    /**
+     * 寻找调用sql的所有method
+     */
+    @Query("match (m:Method)-[r:EXECUTE]->(s:Sql) " +
+            "where id(s)={0} and r.scenarioFrequency > 0 " +
+            "return m")
+    List<Method> findMethodsBySql(long sqlId);
 }

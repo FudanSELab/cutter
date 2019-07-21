@@ -43,6 +43,9 @@ public class TableCutServiceImpl implements TableCutService {
     //返回的最优解,groupNum -> group中的所有表的index
     Map<Integer, List<Integer>> clusters;
 
+    int curServiceNum = 0;
+    int maxServiceNum = 0;
+    Map<Integer, Map<Integer, List<Integer>>> process;//聚类过程
 
     @Override
     public Map<Integer, List<Table>> cutTable(int k) {
@@ -189,14 +192,61 @@ public class TableCutServiceImpl implements TableCutService {
 
         //转换拆分结果
         translateResult(clusters, result, 1, tableList1);
+        curServiceNum = result.size();
+        maxServiceNum = G.length;
 
         //打印聚类过程和每一步的拆分代价
-//        Map<Integer, Map<Integer, List<Integer>>> process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
+        process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
 //        clusteringProcess(process);
 
         return result;
     }
 
+    @Override
+    public Map<Integer, List<Table>> addService(int lastServiceNum) {
+        int targetNum = Integer.MAX_VALUE;
+        int targetKey = -1;
+        for(int key: process.keySet()){
+            Map<Integer, List<Integer>> p = process.get(key);
+            if(p.size() > lastServiceNum && p.size() < targetNum){
+                targetNum = p.size();
+                targetKey = key;
+            }
+        }
+        return getNewProposal(targetKey);
+    }
+
+    @Override
+    public Map<Integer, List<Table>> reduceService(int lastServiceNum) {
+        int targetNum = Integer.MIN_VALUE;
+        int targetKey = -1;
+        for(int key: process.keySet()){
+            Map<Integer, List<Integer>> p = process.get(key);
+            if(p.size() < lastServiceNum && p.size() > targetNum){
+                targetNum = p.size();
+                targetKey = key;
+            }
+        }
+        return getNewProposal(targetKey);
+    }
+
+    private Map<Integer, List<Table>> getNewProposal(int targetKey){
+        clusters = process.get(targetKey);
+        Map<Integer, List<Table>> result  = new HashMap<>();
+        translateResult(clusters, result, 1, tableList1);
+        curServiceNum = result.size();
+        return result;
+    }
+
+    @Override
+    public int getCurServiceNum() {
+        return curServiceNum;
+    }
+
+    @Override
+    public int getMaxServiceNum() {
+        return maxServiceNum;
+    }
 
     //根据共享度高的表调整已有矩阵
     private void adjustWeightforSharing(List<List<Table>> sharingClusters){
@@ -215,6 +265,10 @@ public class TableCutServiceImpl implements TableCutService {
                                 //TODO: need to change a proper strategy
                                 G[i][j] *= 0.2;
                                 G[j][i] = G[i][j];
+                            } else if( i != j && indexes.contains(j)){
+                                //将共享度高的组内的table关联设为最高
+                                G[i][j] = 1.5;
+                                G[j][i] = 1.5;
                             }
                         }
                     }

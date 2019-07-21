@@ -16,7 +16,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @NodeEntity
-public class Class {
+public class Class implements Comparable{
     @Id
     @GeneratedValue
     private Long id;
@@ -40,5 +40,10 @@ public class Class {
         this.tables = new HashSet<>();
 //        this.classContains = new HashSet<>();
 //        this.methods = new HashSet<>();
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return (this.packageName+"."+this.className).compareTo(((Class)o).getPackageName()+"."+((Class)o).getClassName());
     }
 }

@@ -1,0 +1,162 @@
+<div class="ui grid container">
+
+    <div class="row">
+        <div class="nine wide column">
+
+            <div class="row">
+                <div class="ui red large label">
+                    <i class="dollar icon"></i>Cost:
+                </div>
+                <div class="ui orange large label" style="cursor: pointer" ng-click="showSplitModal(3)">
+                    Class
+                    <div class="detail">{{cost.splitNum[2]}}</div>
+                </div>
+                <div class="ui yellow large label" style="cursor: pointer" ng-click="showSplitModal(2)">
+                    Method
+                    <div class="detail">{{cost.splitNum[1]}}</div>
+                </div>
+                <div class="ui olive large label" style="cursor: pointer" ng-click="showSplitModal(1)">
+                    Sql
+                    <div class="detail">{{cost.splitNum[0]}}</div>
+                </div>
+            </div>
+
+            <!--////////////////////////model begin/////////////////////////////-->
+            <div class="ui modal split-modal-sql">
+                <div class="header">Sql to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Sql</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.sqlToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ui modal split-modal-method">
+                <div class="header">Method to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.methodToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ui modal split-modal-class">
+                <div class="header">Class to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.classToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--//////////////////////model end///////////////////////-->
+
+            <div class="row service-group" ng-repeat="(key, value) in proposalGroups" >
+                <div class="ui segment" >
+                    <a class="ui teal ribbon label large" ng-class="{activeService: isSelected(key)}" ng-click="changeTabDetail(key)">Microservice {{key}}</a>
+                    <div class="label-content">
+                        <span ng-drop="true" ng-drop-success="onDropComplete(key,$data)" ng-repeat="table in value" onfinishrenderfilters>
+                            <a class="ui grey tag label table-label popuplabel" ng-drag="true" ng-drag-data="{{table}}">
+                                {{table.tableName}}
+                            </a>
+                            <div class="ui fluid popup" ng-click="extractTable(table)" style="padding:0.6em;cursor: pointer;width:80px !important;">
+                                <span style="color: #007C77;font-weight: bold">Extract</span>
+                            </div>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row service-group" >
+                <div class="ui segment" >
+                    <a class="ui teal ribbon label large" ng-class="{activeService: isSelected(0)}" ng-click="changeTabDetail(0)">Microservice {{maxKey + 1}}</a>
+                    <div class="label-content">
+                        <a class="ui label">No table methods and classes</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="six wide right column">
+
+            <div class="row" style="margin-bottom: 1em;">
+                <button id="last-step-button" class="ui compact labeled icon blue right floated button" ng-click="toSplitPage()">
+                    <i class="angle left icon"></i>
+                    Last Step
+                </button>
+                <div style="clear: both"></div>
+            </div>
+
+            <!--拆分的微服务树形结构-->
+            <div class="row" style="margin-bottom: 1em">
+                <div class="ui card teal" style="width:100%">
+                    <div class="content">
+                        <a class="ui teal ribbon big label" style="margin-bottom: 1em">Package Structure</a>
+
+                        <div id="detail-tree"></div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="split-detail-tab">
+                <div class="ui secondary menu tab-menu" style="color: #00B5AD;font-weight: bold">
+                    <a class="item active " data-tab="class">Class</a>
+                    <a class="item " data-tab="method">Method</a>
+                    <a class="item " data-tab="sql">Sql</a>
+                </div>
+
+                <div class="ui tab segment active" data-tab="class">
+                    <div class="ui label split-label" ng-repeat="c in classes" ng-class="{red: isSplitClass(c.packageName+'.'+c.className)}">{{c.packageName}}.{{c.className}}</div>
+                </div>
+                <div class="ui tab segment" data-tab="method">
+                    <div class="ui label split-label" ng-repeat="m in methods" ng-class="{red: isSplitMethod(m.className+'.'+m.methodName)}">{{m.className}}.{{m.methodName}}</div>
+                </div>
+                <div class="ui tab segment" data-tab="sql">
+                    <div class="ui label split-label" ng-repeat="sql in sqls" ng-class="{red: isSplitSql(sql.sql)}">{{sql.sql}}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="ui active dimmer">
+    <div class="ui large loader"></div>
+</div>

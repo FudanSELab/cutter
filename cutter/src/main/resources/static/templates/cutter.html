@@ -1,0 +1,206 @@
+<div class="ui grid container">
+
+    <div class="row">
+        <div class="nine wide column">
+
+            <div class="row">
+                <div class="ui red large label">
+                    <i class="dollar icon"></i>Cost:
+                </div>
+                <div class="ui orange large label" style="cursor: pointer" ng-click="showSplitModal(3)">
+                    Class
+                    <div class="detail">{{cost.splitNum[2]}}</div>
+                </div>
+                <div class="ui yellow large label" style="cursor: pointer" ng-click="showSplitModal(2)">
+                    Method
+                    <div class="detail">{{cost.splitNum[1]}}</div>
+                </div>
+                <div class="ui olive large label" style="cursor: pointer" ng-click="showSplitModal(1)">
+                    Sql
+                    <div class="detail">{{cost.splitNum[0]}}</div>
+                </div>
+
+            </div>
+
+            <!--////////////////////////model begin/////////////////////////////-->
+            <div class="ui modal split-modal-sql">
+                <div class="header">Sql to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Sql</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.sqlToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ui modal split-modal-method">
+                <div class="header">Method to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.methodToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ui modal split-modal-class">
+                <div class="header">Class to Split</div>
+                <div class="content" style="max-height: 500px;overflow-y: scroll">
+                    <table class="ui striped table">
+                        <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>MicroService Nums</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="(key, val) in cost.classToSplitResult">
+                            <td>{{key}}</td>
+                            <td>{{val}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--//////////////////////model end///////////////////////-->
+
+            <div class="row service-group" ng-repeat="(key, value) in proposalGroups" >
+                <div class="ui segment" >
+                    <a class="ui teal ribbon label large" style="cursor: default">Microservice {{key}}</a>
+                    <div class="label-content">
+                        <span ng-repeat="table in value" onfinishrenderfilters>
+                            <a class="ui grey tag label table-label popuplabel" style="cursor: default">
+                                {{table.tableName}}
+                            </a>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="six wide right column">
+
+            <div class="row" style="margin-bottom: 1em;">
+                <button id="adjust-button" class="ui compact labeled icon blue right floated disabled button" ng-click="toAdjustPage()">
+                    <i class="cog icon"></i>
+                    Adjust
+                </button>
+                <button class="ui compact labeled icon blue right floated button" ng-click="startSplit()">
+                    <i class="play icon"></i>
+                    Run
+                </button>
+                <div style="clear: both"></div>
+            </div>
+
+            <!--拆分粒度调整-->
+            <div class="row" style="margin-bottom: 1em">
+                <div class="ui card teal" style="width:100%">
+                    <div class="content">
+                        <a class="ui teal ribbon big label" style="margin-bottom: 1em">Microservice Number</a>
+
+                        <div class="row">
+                            <div class="ui teal progress" data-percent="{{granularityPercent}}" id="granularity-progress">
+                                <div class="bar" ng-style="{width:(granularityPercent * 100) + '%'}">
+                                    <div class="progress">{{splitGranularity.curServiceNum}}</div>
+                                </div>
+                            </div>
+                            <button class="ui red icon mini button" id="minus-granularity-button" ng-click="reduceService()"><i class="minus icon"></i></button>
+                            <button class="ui green icon right floated mini button" id="add-granularity-button" ng-click="addService()"><i class="add icon"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--共享表-->
+            <div class="row">
+                <div class="ui card teal" style="width: 100%">
+                    <div class="content">
+
+                        <a class="ui teal ribbon big label" style="margin-bottom: 1em">Sharing Table Groups</a>
+
+                        <div class="item" ng-repeat="shareGroup in sharingTableGroups" style="margin-bottom: 1em;">
+                            <!--<a class="ui teal ribbon label"> Group {{$index + 1}} </a>-->
+
+                            <div class="ui icon large blue label">
+                                <i class="tag icon"></i>
+                                Group {{$index + 1}}:
+                                <i class="delete icon" ng-click="deleteSharingGroup($index)"></i>
+                            </div>
+
+                            <div>
+                                <a class="ui grey tag label" ng-repeat="table in shareGroup" style="margin: 1em;">{{table.tableName}}</a>
+                                <!--<button class="ui icon mini right floated circular button" ng-click="deleteSharingGroup($index)">-->
+                                <!--<i class="delete icon"></i>-->
+                                <!--</button>-->
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="item">
+                            <h4 class="ui horizontal divider header" style="color:#007C77 ">
+                                Add Sharing Group
+                            </h4>
+
+                            <div class="ui multiple dropdown teal" id="shareDropdown" style="color:#00B5AD;">
+                                <span class="text"></span>
+                                <button class="ui icon small teal button">
+                                    <i class="add icon"></i>
+                                </button>
+                                <div class="menu">
+                                    <div class="scrolling menu">
+                                        <div class="item" data-value="{{table.id}}" ng-repeat="table in notSharingTables">
+                                            <div class="ui teal empty circular label"></div>
+                                            {{table.tableName}}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div style="margin-top: 1em">
+                                <div class="ui large right floated mini buttons">
+                                    <button class="ui teal button" ng-click="addSharingGroup()">Add</button>
+                                    <div class="or"></div>
+                                    <button class="ui button" ng-click="cancelSharingGroup()">Cancel</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+</div>
+
+<div class="ui active dimmer">
+    <div class="ui large loader"></div>
+</div>

@@ -224,7 +224,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
             isSimilar = true;
         }
 //      整体相似
-        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.4){
+        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.8){
             isSimilar = true;
         }
         return isSimilar;

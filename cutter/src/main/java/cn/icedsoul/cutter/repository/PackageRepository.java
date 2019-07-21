@@ -18,4 +18,13 @@ public interface PackageRepository extends Neo4jRepository<Package, Long> {
     @Query("match (n:Package)-[:PACKAGE_CONTAIN]->(c:Package) where id(n)={0} return c")
     List<Package> findChildrenByPackageId(long id);
 
+    @Query("match (p:Package)-[:CLASS_CONTAIN]->(c:Class) where id(c)={0} return p")
+    Package findPackageByClassId(long classId);
+
+    @Query("match (p:Package)-[:PACKAGE_CONTAIN]->(c:Package) where id(c)={0} return p")
+    Package findParentByPackageId(long packageId);
+
+    @Query("match (p:Package) where p.packageName='Root' return p")
+    Package findRoot();
+
 }

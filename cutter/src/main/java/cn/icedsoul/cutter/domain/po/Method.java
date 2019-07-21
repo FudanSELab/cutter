@@ -19,7 +19,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @NodeEntity
-public class Method {
+public class Method implements Comparable{
     @Id
     @GeneratedValue
     private Long id;
@@ -79,5 +79,10 @@ public class Method {
     @Override
     public int hashCode() {
         return Objects.hash(modifier, returnType, packageName, className, methodName, params);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return (this.className+"."+this.methodName).compareTo(((Method)o).getClassName()+"."+((Method)o).getMethodName());
     }
 }

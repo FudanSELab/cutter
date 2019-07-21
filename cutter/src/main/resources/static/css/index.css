@@ -32,4 +32,41 @@ body{
     margin-right: 0.5em;
 }
 
+/*tab*/
+.ui.secondary.menu .item{
+    font-weight: bold;
+    color:#007C77;
+}
 
+.ui.secondary.menu .item:hover{
+    font-weight: bold;
+    color:#007C77;
+}
+
+.ui.secondary.menu .active.item{
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #00B5AD;
+}
+
+.ui.secondary.menu .active.item:hover{
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #00B5AD;
+}
+
+.ui.label.split-label{
+    margin-bottom: 0.5em;
+}
+
+.ui.ribbon.label.activeService{
+    background-color: #007C77 !important;
+}
+
+.tagtree li span{
+    padding-right: 0.5em;
+}
+
+.tagtree li::before, .tagtree li::after{
+    position:fixed;
+}
