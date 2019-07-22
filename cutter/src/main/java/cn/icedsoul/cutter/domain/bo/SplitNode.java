@@ -14,11 +14,22 @@ public class SplitNode {
     private String name;
     private int level;//1:package 2:class 3:method 4:sql
     private List<SplitNode> children = new ArrayList<>();
+    private String iconSkin;
+    String[] icons = {"", "package","class","method",""};
 
     public SplitNode(long id, String name, int level){
         this.id = id;
         this.name = name;
         this.level = level;
+        this.iconSkin= icons[level];
+    }
+
+    public String getIconSkin() {
+        return iconSkin;
+    }
+
+    public void setIconSkin(String iconSkin) {
+        this.iconSkin = iconSkin;
     }
 
     public void addNode(SplitNode sn){

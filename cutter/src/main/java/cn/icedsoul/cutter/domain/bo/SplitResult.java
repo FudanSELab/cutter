@@ -14,6 +14,7 @@ public class SplitResult {
     private Map<Integer, List<Table>> splitProposal;
     private SplitGranularity splitGranularity;
     private SplitCost splitCost;
+    private double costProportion;//拆分代价的分数占比
 
     public Map<Integer, List<Table>> getSplitProposal() {
         return splitProposal;
@@ -37,5 +38,13 @@ public class SplitResult {
 
     public void setSplitCost(SplitCost splitCost) {
         this.splitCost = splitCost;
+    }
+
+    public double getCostProportion() {
+        return costProportion;
+    }
+
+    public void setCostProportion(double costProportion) {
+        this.costProportion = costProportion;
     }
 }

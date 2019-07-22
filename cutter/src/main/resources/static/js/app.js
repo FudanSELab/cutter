@@ -49,15 +49,21 @@ app.directive('onfinishrenderfilters', function ($timeout) {
 
 //从第一个页面跳转第二个页面需要传递的参数
 app.factory('ProposalFactory', function(){
-    var proposalGroups = {}, maxKey = 0, cost = {}, splitGranularity = {}, sharingTableGroups = [], allTables = [];
+    var proposalGroups = {}, maxKey = 0, cost = {}, splitGranularity = {},
+        sharingTableGroups = [], allTables = [], costProportion = 0;
     var factory = {};
-    factory.setProposal = function(a, b, c, d,e, f){
+    factory.setProposal = function(a, b, c, d,e, f, g){
         proposalGroups = a;
         maxKey = b;
         cost = c;
         splitGranularity = d;
         sharingTableGroups = e;
         allTables = f;
+        costProportion = g;
+    };
+
+    factory.getCostProportion = function(){
+        return costProportion;
     };
 
     factory.getProposalGroups = function(){
@@ -89,6 +95,44 @@ app.factory('ProposalFactory', function(){
 
 app.factory('SplitService', function ($http, $q) {
     var service = {};
+
+    service.addCostProportion = function(){
+        var deferred = $q.defer();
+        var promise = deferred.promise;
+        $http({
+            method: "get",
+            url: "/addCostProportion",
+            contentType: "application/json",
+            dataType: "json",
+            withCredentials: true
+        }).success(function (data) {
+            if (data) {
+                deferred.resolve(data);
+            } else{
+                alert("Add Cost Proportion fail!" + data.message);
+            }
+        });
+        return promise;
+    };
+
+    service.reduceCostProportion = function(){
+        var deferred = $q.defer();
+        var promise = deferred.promise;
+        $http({
+            method: "get",
+            url: "/reduceCostProportion",
+            contentType: "application/json",
+            dataType: "json",
+            withCredentials: true
+        }).success(function (data) {
+            if (data) {
+                deferred.resolve(data);
+            } else{
+                alert("Reduce Cost Proportion fail!" + data.message);
+            }
+        });
+        return promise;
+    };
 
     service.getNoTableTree = function(){
         var deferred = $q.defer();

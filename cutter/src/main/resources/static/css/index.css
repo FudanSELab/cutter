@@ -70,3 +70,39 @@ body{
 .tagtree li::before, .tagtree li::after{
     position:fixed;
 }
+
+
+.ztree li span.button.package_ico_open{
+    margin-right:2px;
+    background: url(../lib/ztree/css/zTreeStyle/img/diy/package_open.png) no-repeat scroll 0 0 transparent;
+    vertical-align:top;
+    *vertical-align:middle
+}
+
+.ztree li span.button.package_ico_close{
+    margin-right:2px;
+    background: url(../lib/ztree/css/zTreeStyle/img/diy/package_close.png) no-repeat scroll 0 0 transparent;
+    vertical-align:top;
+    *vertical-align:middle
+}
+
+.ztree li span.button.class_ico_open{
+    margin-right:2px;
+    background: url(../lib/ztree/css/zTreeStyle/img/diy/class_open.png) no-repeat scroll 0 0 transparent;
+    vertical-align:top;
+    *vertical-align:middle
+}
+
+.ztree li span.button.class_ico_close{
+    margin-right:2px;
+    background: url(../lib/ztree/css/zTreeStyle/img/diy/class_close.png) no-repeat scroll 0 0 transparent;
+    vertical-align:top;
+    *vertical-align:middle
+}
+
+.ztree li span.button.method_ico_docu{
+    margin-right:2px;
+    background: url(../lib/ztree/css/zTreeStyle/img/diy/method.png) no-repeat scroll 0 0 transparent;
+    vertical-align:top;
+    *vertical-align:middle
+}

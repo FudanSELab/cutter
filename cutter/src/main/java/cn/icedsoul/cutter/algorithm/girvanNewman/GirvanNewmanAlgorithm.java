@@ -15,6 +15,7 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
     double[][] G;
     int k = 0;
     Map<Integer, ArrayList<Cluster>> allResults;
+    Map<Integer, Double> modularityMap;
 
     public GirvanNewmanAlgorithm(double[][] G){
         this.G = G;
@@ -67,6 +68,8 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
 
         //获取每一步的分割方案
         allResults = clusterer.getAllResults();
+        //获取模块度map
+        modularityMap = clusterer.getModularityMap();
 
         return clusters;
     }
@@ -81,6 +84,10 @@ public class GirvanNewmanAlgorithm implements CutGraphAlgorithm {
         Node node = model.factory().newNode();
         graph.addNode(node);
         return node;
+    }
+
+    public Map<Integer, Double> getModularityMap(){
+        return modularityMap;
     }
 
     public Map<Integer, Map<Integer, List<Integer>>> getAllResults(){

@@ -18,4 +18,6 @@ public interface SplitCostService {
 
     List<SplitNode> getNoTableTree();
 
+    //仅计算拆分总分，不用计算总拆分代价，仅用于最优方案的计算
+    double simpleGetSplitCost(List<List<Long>> tableGroups);
 }

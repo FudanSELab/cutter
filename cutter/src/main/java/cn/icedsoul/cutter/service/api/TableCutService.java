@@ -28,4 +28,9 @@ public interface TableCutService {
 
     int getMaxServiceNum();
 
+    double getCostProportion();
+
+    Map<Integer, List<Table>> addCostProportion();
+
+    Map<Integer, List<Table>> reduceCostProportion();
 }

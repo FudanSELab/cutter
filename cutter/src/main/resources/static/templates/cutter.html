@@ -115,6 +115,25 @@
                 <div style="clear: both"></div>
             </div>
 
+            <!--拆分开销所占比重-->
+            <div class="row" style="margin-bottom: 1em">
+                <div class="ui card teal" style="width:100%">
+                    <div class="content">
+                        <a class="ui teal ribbon big label" style="margin-bottom: 1em">Cost Proportion</a>
+
+                        <div class="row">
+                            <div class="ui teal progress" data-percent="{{costProportion}}" id="cost-proportion-progress">
+                                <div class="bar" ng-style="{width:(costProportion * 100) + '%'}">
+                                    <div class="progress">{{costProportion * 100}}%</div>
+                                </div>
+                            </div>
+                            <button class="ui red icon mini button" id="minus-cost-button" ng-click="reduceCostProportion()"><i class="minus icon"></i></button>
+                            <button class="ui green icon right floated mini button" id="add-cost-button" ng-click="addCostProportion()"><i class="add icon"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!--拆分粒度调整-->
             <div class="row" style="margin-bottom: 1em">
                 <div class="ui card teal" style="width:100%">

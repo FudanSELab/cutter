@@ -14,6 +14,15 @@ public class SplitCost {
     private Map sqlToSplitResult = new HashMap<>();
     private Map methodToSplitResult = new HashMap<>();
     private Map classToSplitResult = new HashMap<>();
+    private double score;
+
+    public double getScore() {
+        return score;
+    }
+
+    public void setScore(double score) {
+        this.score = score;
+    }
 
     public int[] getSplitNum() {
         return splitNum;

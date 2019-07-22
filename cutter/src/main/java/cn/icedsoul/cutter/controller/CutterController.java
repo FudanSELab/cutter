@@ -65,15 +65,6 @@ public class CutterController {
         weightCalculationService.addSimilarWeight();
     }
 
-
-
-    private SplitResult composeSplitResult(Map<Integer, List<Table>> proposal){
-        SplitCost cost = calculateSplitCost(proposal);
-        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
-        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
-        return result;
-    }
-
     @CrossOrigin(origins = "*")
     @PostMapping(value = "/adjustWeightAndCut")
     @ApiOperation(value = "Cut table3", notes = "Adjust the weight of tables that have high sharing degree and then cut table")
@@ -82,7 +73,7 @@ public class CutterController {
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
         SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
-        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost, tableCutService.getCostProportion());
 
         return result;
     }
@@ -101,7 +92,7 @@ public class CutterController {
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
         SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
-        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost, tableCutService.getCostProportion());
         return result;
     }
 
@@ -144,7 +135,7 @@ public class CutterController {
         //calculate split cost
         SplitCost cost = calculateSplitCost(proposal);
         SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
-        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost, tableCutService.getCostProportion());
         return result;
     }
 
@@ -159,8 +150,26 @@ public class CutterController {
         Map<Integer, List<Table>> proposal = tableCutService.realCut(k, sharingTableGroups);
         SplitCost cost = calculateSplitCost(proposal);
         SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
-        SplitResult result = new SplitResult(proposal, splitGranularity, cost);
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost, tableCutService.getCostProportion());
         return result;
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/addCostProportion")
+    @ApiOperation(value = "Add Cost Proportion", notes = "Add Cost Proportion")
+    //拆分开销占比增加0.1
+    public SplitResult addCostProportion(){
+        Map<Integer, List<Table>> proposal = tableCutService.addCostProportion();
+        return composeSplitResult(proposal);
+    }
+
+    @CrossOrigin(origins = "*")
+    @GetMapping(value = "/reduceCostProportion")
+    @ApiOperation(value = "Reduce Cost Proportion", notes = "Reduce Cost Proportion")
+    //拆分开销占比减小0.1
+    public SplitResult reduceCostProportion(){
+        Map<Integer, List<Table>> proposal = tableCutService.reduceCostProportion();
+        return composeSplitResult(proposal);
     }
 
     @CrossOrigin(origins = "*")
@@ -179,6 +188,13 @@ public class CutterController {
     public SplitResult reduceService(@RequestBody int lastServiceNum){
         Map<Integer, List<Table>> proposal = tableCutService.reduceService(lastServiceNum);
         return composeSplitResult(proposal);
+    }
+
+    private SplitResult composeSplitResult(Map<Integer, List<Table>> proposal){
+        SplitCost cost = calculateSplitCost(proposal);
+        SplitGranularity splitGranularity = new SplitGranularity(tableCutService.getCurServiceNum(), tableCutService.getMaxServiceNum());
+        SplitResult result = new SplitResult(proposal, splitGranularity, cost, tableCutService.getCostProportion());
+        return result;
     }
 
     @CrossOrigin(origins = "*")

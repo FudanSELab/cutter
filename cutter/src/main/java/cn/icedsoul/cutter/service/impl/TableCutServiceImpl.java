@@ -46,6 +46,9 @@ public class TableCutServiceImpl implements TableCutService {
     int curServiceNum = 0;
     int maxServiceNum = 0;
     Map<Integer, Map<Integer, List<Integer>>> process;//聚类过程
+    Map<Integer, Double> modularityMap;//模块度map,clusterNum->score
+    Map<Integer, Double> costMap;//拆分代价map,clusterNum->score
+    double costProportion = 0;//拆分代价的分数占比
 
     @Override
     public Map<Integer, List<Table>> cutTable(int k) {
@@ -128,7 +131,6 @@ public class TableCutServiceImpl implements TableCutService {
     }
 
 
-
     @Override
     //Adjust the weight of tables that have high sharing degree and then cut table
     public Map<Integer, List<Table>> cutTable3(int k) {
@@ -171,12 +173,13 @@ public class TableCutServiceImpl implements TableCutService {
         return result;
     }
 
-
     ////////////////////////网页用到的接口///////////////////////////////////////////////////
+
 
     //使用前台传的共享表,目前使用的是削减矩阵的权重
     @Override
     public Map<Integer, List<Table>> realCut(int k, List<List<Table>> sharingClusters) {
+
         generateGraph();
         printG(G);
 
@@ -185,10 +188,13 @@ public class TableCutServiceImpl implements TableCutService {
         adjustWeightforSharing(sharingClusters);
         //切图
         CutGraphAlgorithm cutGraphAlgorithm = new GirvanNewmanAlgorithm(G);
-//        CutGraphAlgorithm cutGraphAlgorithm = new CommunityDetectionAlgorithm(G);
-        clusters = cutGraphAlgorithm.calculate();
-//        CutGraphAlgorithm cutGraphAlgorithm = new SpectralClusteringAlgorithm(G, k);
-//        clusters = cutGraphAlgorithm.calculate();
+        cutGraphAlgorithm.calculate();
+
+        //获取所有拆分方案
+        process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
+        modularityMap = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getModularityMap();
+        //选择最优的一个方案
+        clusters = process.get(MultiObjectiveOptimization());
 
         //转换拆分结果
         translateResult(clusters, result, 1, tableList1);
@@ -196,11 +202,84 @@ public class TableCutServiceImpl implements TableCutService {
         maxServiceNum = G.length;
 
         //打印聚类过程和每一步的拆分代价
-        process = ((GirvanNewmanAlgorithm) cutGraphAlgorithm).getAllResults();
 //        clusteringProcess(process);
 
         return result;
     }
+
+
+
+    //计算每个拆分方案的拆分代价，并返回最优的拆分方案index
+    private Integer MultiObjectiveOptimization(){
+        costMap = new HashMap<>();
+        double maxScore = Double.MIN_VALUE, minScore = Double.MAX_VALUE;
+
+        for(Integer clusterNum: process.keySet()){
+            Map<Integer, List<Integer>> curProposal = process.get(clusterNum);
+            //拆分代价越大，这个score越高
+            double splitScore = splitCostService.simpleGetSplitCost(turnProposalToIdList(curProposal));
+            costMap.put(clusterNum, splitScore);
+            if(maxScore < splitScore){
+                maxScore = splitScore;
+            }
+            if(minScore > splitScore){
+                minScore = splitScore;
+            }
+        }
+        for(int clusterNum: costMap.keySet()){
+            costMap.put(clusterNum, 1 - ((costMap.get(clusterNum) - minScore)/ (maxScore - minScore)));
+//            System.out.println("clusterNum:" + clusterNum + " final costScore:" + costMap.get(clusterNum));
+        }
+
+        return calculateTotalScore();
+    }
+
+    @Override
+    public Map<Integer, List<Table>> addCostProportion() {
+        if(costProportion <= 0.9){
+            costProportion += 0.1;
+        }
+        return getNewProposal(calculateTotalScore());
+    }
+
+    @Override
+    public Map<Integer, List<Table>> reduceCostProportion() {
+        if(costProportion >= 0.1){
+            costProportion -= 0.1;
+        }
+        return getNewProposal(calculateTotalScore());
+    }
+
+    //返回总分最高的分组对应的分组数，即process中的key值
+    private int calculateTotalScore(){
+        int maxTotalScoreClusterNum = -1;
+        double maxTotalScore = Double.MIN_VALUE;
+        for(int clusterNum: modularityMap.keySet()){
+            if(clusterNum > 1){//排除掉不拆的情况
+                double modularityScore = modularityMap.get(clusterNum);
+                double costScore = costMap.get(clusterNum);
+                double totalScore = (1-costProportion) * modularityScore + costProportion * costScore;
+                System.out.println("组数：" + clusterNum + " modularityScore:" + modularityScore
+                        + " costScore:" + costScore + " totalScore:" + totalScore);
+                if(totalScore > maxTotalScore){
+                    maxTotalScore = totalScore;
+                    maxTotalScoreClusterNum = clusterNum;
+                }
+            }
+        }
+        return maxTotalScoreClusterNum;
+    }
+
+    //取出拆分方案中的tableid作为拆分代价计算的输入
+    private List<List<Long>> turnProposalToIdList(Map<Integer, List<Integer>> curProposal){
+        List<List<Long>> idList = new ArrayList<>();
+        for(int groupNum: curProposal.keySet()){
+            List<Long> tempList = curProposal.get(groupNum).stream().map(i -> tableList1.get(i).getId()).collect(Collectors.toList());
+            idList.add(tempList);
+        }
+        return idList;
+    }
+
 
     @Override
     public Map<Integer, List<Table>> addService(int lastServiceNum) {
@@ -230,6 +309,7 @@ public class TableCutServiceImpl implements TableCutService {
         return getNewProposal(targetKey);
     }
 
+    //获取特定clusterNum的拆分方案结果
     private Map<Integer, List<Table>> getNewProposal(int targetKey){
         clusters = process.get(targetKey);
         Map<Integer, List<Table>> result  = new HashMap<>();
@@ -247,6 +327,12 @@ public class TableCutServiceImpl implements TableCutService {
     public int getMaxServiceNum() {
         return maxServiceNum;
     }
+
+    @Override
+    public double getCostProportion() {
+        return (double) Math.round(costProportion * 100) / 100;
+    }
+
 
     //根据共享度高的表调整已有矩阵
     private void adjustWeightforSharing(List<List<Table>> sharingClusters){
@@ -275,8 +361,8 @@ public class TableCutServiceImpl implements TableCutService {
                 }
             }
         }
-        System.out.println("----Graph after adjusting weight-----");
-        printG(G);
+//        System.out.println("----Graph after adjusting weight-----");
+//        printG(G);
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -325,14 +411,14 @@ public class TableCutServiceImpl implements TableCutService {
             G = new double[tableSize][tableSize];
             List<Double[][]> weightMatrixs = weightCalculationService.addSimilarWeight();
             Double[][] G1 = weightMatrixs.get(0);
-            System.out.println("---G1----");
-            printG123(G1);
+//            System.out.println("---G1----");
+//            printG123(G1);
             Double[][] G2 = weightMatrixs.get(1);
-            System.out.println("---G2----");
-            printG123(G2);
+//            System.out.println("---G2----");
+//            printG123(G2);
             Double[][] G3 = weightMatrixs.get(2);
-            System.out.println("---G3----");
-            printG123(G3);
+//            System.out.println("---G3----");
+//            printG123(G3);
             for(int i = 0; i < tableSize; i++){
                 for(int j = 0; j < tableSize; j++){
                     if(i == j) continue;
@@ -349,7 +435,7 @@ public class TableCutServiceImpl implements TableCutService {
             }
         }
         double pro = (double)notZeroNum / (tableSize * tableSize);
-        System.out.println("G规模：" + (tableSize*tableSize) + " 非0元素的个数：" + notZeroNum + " 占比：" + pro);
+//        System.out.println("G规模：" + (tableSize*tableSize) + " 非0元素的个数：" + notZeroNum + " 占比：" + pro);
     }
 
 

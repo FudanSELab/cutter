@@ -7,6 +7,23 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
 
         //当前proposalGroups中最大的key，即为proposalGroups的长度
         $scope.maxKey = 0;
+        $scope.costProportion = 0;
+
+        //////////////////拆分代价表中进度条////////////////////
+
+        //代价比重禁用
+        $scope.disableCostProgress = function(){
+            $('#cost-proportion-progress').addClass('disabled');
+            $('#minus-cost-button').addClass('disabled');
+            $('#add-cost-button').addClass('disabled');
+        };
+
+        //代价比重可用
+        $scope.enableCostProgress = function(){
+            $('#cost-proportion-progress').removeClass('disabled');
+            $('#minus-cost-button').removeClass('disabled');
+            $('#add-cost-button').removeClass('disabled');
+        };
 
         ///////////////////////loading//////////////////////////////
         //加载数据中，隐藏滚动条
@@ -31,6 +48,7 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
             $scope.cost = data.splitCost;
             $scope.splitGranularity = data.splitGranularity;
             $scope.granularityPercent = $scope.splitGranularity.curServiceNum / $scope.splitGranularity.maxServiceNum;
+            $scope.costProportion = data.costProportion;
         };
 
         $scope.startSplit = function(){
@@ -39,7 +57,8 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
             SplitService.startSplit(0, $scope.sharingTableGroups).then(function(data){
                 $scope.handleSplitResult(data);
                 $scope.hideLoading();
-                $scope.enableProgress();
+                $scope.enableNumProgress();
+                $scope.enableCostProgress();
                 $('#adjust-button').removeClass('disabled');
             });
         };
@@ -61,26 +80,19 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
         };
 
         //拆分粒度禁用
-        $scope.disableProgress = function(){
+        $scope.disableNumProgress = function(){
             $('#granularity-progress').addClass('disabled');
             $('#minus-granularity-button').addClass('disabled');
             $('#add-granularity-button').addClass('disabled');
         };
 
         //拆分粒度恢复可用
-        $scope.enableProgress = function(){
+        $scope.enableNumProgress = function(){
             $('#granularity-progress').removeClass('disabled');
             $('#minus-granularity-button').removeClass('disabled');
             $('#add-granularity-button').removeClass('disabled');
         };
 
-        // //由于手动改变table归属，必须重新计算当前的服务数量
-        // $scope.refreshProgress = function(){
-        //     //重新计算当前微服务数量和百分比，然后禁用微服务数量的更改
-        //     $scope.splitGranularity.curServiceNum = Object.keys($scope.proposalGroups).length;
-        //     $scope.granularityPercent = $scope.splitGranularity.curServiceNum / $scope.splitGranularity.maxServiceNum;
-        //     $scope.disableProgress();
-        // };
         //////////////////////初始化，初始共享表/////////////////////////
         //共享表的选择
         $('#shareDropdown').dropdown();
@@ -96,12 +108,12 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
 
             $scope.sharingTableGroups = ProposalFactory.getSharingTableGroups();
             $scope.allTables = ProposalFactory.getAllTables();
-            console.log("$scope.allTables:");
-            console.log($scope.allTables);
+
+            $scope.costProportion = ProposalFactory.getCostProportion();
 
             $scope.refreshNoSharing();
 
-            $scope.enableProgress();
+            $scope.enableNumProgress();
             $('#adjust-button').removeClass('disabled');
 
             $scope.hideLoading();
@@ -130,7 +142,8 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
 
         //加载数据，初始化
         $scope.init = function(){
-            $scope.disableProgress();
+            $scope.disableNumProgress();
+            $scope.disableCostProgress();
 
             if(ProposalFactory.getMaxKey() != 0){
                 console.log("从第二个页面跳转回来了");
@@ -221,12 +234,35 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
             }
         };
 
+        ////////////////////////调整split cost的score在最终结果中的占比/////////////////////////////////////
+        $scope.reduceCostProportion = function(){
+            if($scope.costProportion <= 0) return;
+            $scope.showLoading();
+            SplitService.reduceCostProportion().then(function(data){
+                $scope.handleSplitResult(data);
+                $scope.hideLoading();
+                $scope.enableCostProgress();
+            });
+        };
+
+        $scope.addCostProportion = function(){
+            if($scope.costProportion >= 1) return;
+            $scope.showLoading();
+            SplitService.addCostProportion().then(function(data){
+                $scope.handleSplitResult(data);
+                $scope.hideLoading();
+                $scope.enableCostProgress();
+            });
+        };
+
+
+
         /////////////////////////跳转到第二个界面////////////////////////////
         $scope.toAdjustPage = function(){
             if($scope.proposalGroups === undefined) return;
 
             ProposalFactory.setProposal($scope.proposalGroups, $scope.maxKey, $scope.cost,
-                $scope.splitGranularity, $scope.sharingTableGroups, $scope.allTables);
+                $scope.splitGranularity, $scope.sharingTableGroups, $scope.allTables, $scope.costProportion);
 
             $location.path('/adjust');
         };

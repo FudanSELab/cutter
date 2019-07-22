@@ -4,6 +4,7 @@ adjuster.controller('AdjustCtrl', ['$scope', '$http','$window', '$location', 'Co
     function($scope, $http, $window, $location, CostService, ProposalFactory, SplitService) {
 
         ////////////////////////////////////////////////////////
+        //回到上一步
         $scope.toSplitPage = function(){
             $location.path('/cut');
         };
@@ -94,18 +95,31 @@ adjuster.controller('AdjustCtrl', ['$scope', '$http','$window', '$location', 'Co
             });
         };
 
+
+        $scope.treeSetting = {
+            view:{
+                showIcon:true
+            }
+        };
+
+        //填充单个微服务项目所包含的包目录结构
         $scope.fillTree = function(data){
-            $("#detail-tree").html("");
-            $("#detail-tree").tagTree({
-                id: "",
-                data: data,
-                fold: true,
-                multiple: true
-            });
+            // $("#detail-tree").html("");
+            // $("#detail-tree").tagTree({
+            //     id: "",
+            //     data: data,
+            //     fold: true,
+            //     multiple: true
+            // });
+
+            if($scope.tree != undefined){
+                $scope.tree.destroy();
+            }
+            $scope.tree = $.fn.zTree.init($("#detail-tree"), $scope.treeSetting, data);
 
         };
 
-        //填充右侧的tab
+        //填充右侧的tab，显示单个微服务包含的class/method/sql
         $scope.fillTab = function(){
             $scope.sqls = $scope.groupBySql[$scope.selectedServiceKey];
             $scope.methods = $scope.groupByMethod[$scope.selectedServiceKey];
