@@ -55,4 +55,9 @@ public interface MethodRepository extends Neo4jRepository<Method, Long> {
             "where id(s)={0} and r.scenarioFrequency > 0 " +
             "return m")
     List<Method> findMethodsBySql(long sqlId);
+
+    @Query("match (c:Class)-[r:METHOD_CONTAIN]->(m:Method) " +
+            "where id(c)={0}" +
+            "return id(m)")
+    List<Long> getMethodsByClassId(long classId);
 }

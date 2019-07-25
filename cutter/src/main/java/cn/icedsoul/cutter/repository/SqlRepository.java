@@ -5,6 +5,8 @@ import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author IcedSoul
  * @date 19-5-6 上午10:26
@@ -24,5 +26,9 @@ public interface SqlRepository extends Neo4jRepository<Sql, Long> {
             "return sum(r.scenarioFrequency)")
     double getSumSqlFrequencyBySqlId(long slqId);
 
+    @Query("match (m:Method)-[r:EXECUTE]->(s:Sql) " +
+            "where id(m)={0} and r.scenarioFrequency > 0 " +
+            "return distinct(id(s))")
+    List<Long> getSqlsByMethodId(long methodId);
 
 }

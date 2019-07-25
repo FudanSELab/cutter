@@ -102,20 +102,17 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
             $scope.proposalGroups = ProposalFactory.getProposalGroups();
             $scope.maxKey = ProposalFactory.getMaxKey();
             $scope.cost = ProposalFactory.getCost();
-
             $scope.splitGranularity = ProposalFactory.getSplitGranularity();
             $scope.granularityPercent = $scope.splitGranularity.curServiceNum / $scope.splitGranularity.maxServiceNum;
-
             $scope.sharingTableGroups = ProposalFactory.getSharingTableGroups();
             $scope.allTables = ProposalFactory.getAllTables();
-
             $scope.costProportion = ProposalFactory.getCostProportion();
 
             $scope.refreshNoSharing();
 
             $scope.enableNumProgress();
+            $scope.enableCostProgress();
             $('#adjust-button').removeClass('disabled');
-
             $scope.hideLoading();
         };
 
@@ -254,8 +251,6 @@ cutter.controller('CutCtrl', ['$scope', '$http', '$window','$location', 'SplitSe
                 $scope.enableCostProgress();
             });
         };
-
-
 
         /////////////////////////跳转到第二个界面////////////////////////////
         $scope.toAdjustPage = function(){
