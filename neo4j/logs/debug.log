@@ -1284,3 +1284,12 @@
 2019-08-16 05:39:12.098+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=123, gcTime=0, gcCount=0}
 2019-08-16 05:39:23.831+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=164, gcTime=0, gcCount=0}
 2019-08-16 05:47:20.627+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=120, gcTime=0, gcCount=0}
+2019-08-16 06:24:20.321+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=101, gcTime=0, gcCount=0}
+2019-08-16 08:16:11.346+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=120, gcTime=0, gcCount=0}
+2019-08-16 08:16:11.646+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=106, gcTime=0, gcCount=0}
+2019-08-19 01:14:29.979+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=4932, gcTime=0, gcCount=0}
+2019-08-19 05:37:11.923+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=2832, gcTime=0, gcCount=0}
+2019-08-19 05:37:14.178+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=2155, gcTime=0, gcCount=0}
+2019-08-19 11:23:28.926+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=2856, gcTime=0, gcCount=0}
+2019-08-19 11:23:30.889+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=1863, gcTime=0, gcCount=0}
+2019-08-20 01:45:54.922+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=3065, gcTime=0, gcCount=0}
