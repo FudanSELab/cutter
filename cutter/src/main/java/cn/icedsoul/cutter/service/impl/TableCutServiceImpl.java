@@ -37,7 +37,9 @@ public class TableCutServiceImpl implements TableCutService {
     List<Table> tableList1;
     int tableSize;
     double[][] G;
-    double alpha = 1, beta = 0.5, gama = 0.2;
+    //TODO: need to check
+//    double alpha = 1, beta = 0.5, gama = 0.2;
+    double alpha = 0.6, beta = 0.3, gama = 0.1;
     //从tableid到tableList中下标的映射
     Map<Long, Integer> tableId2IndexMap = new HashMap<>();
     //返回的最优解,groupNum -> group中的所有表的index
@@ -202,7 +204,7 @@ public class TableCutServiceImpl implements TableCutService {
         maxServiceNum = G.length;
 
         //打印聚类过程和每一步的拆分代价
-//        clusteringProcess(process);
+        clusteringProcess(process);
 
         return result;
     }
@@ -348,13 +350,16 @@ public class TableCutServiceImpl implements TableCutService {
                     if(indexes.contains(i)){
                         for(int j = 0; j < tableSize; j++){
                             if( G[i][j] > 0  && !indexes.contains(j)){
-                                //TODO: need to change a proper strategy
+
                                 G[i][j] *= 0.2;
                                 G[j][i] = G[i][j];
                             } else if( i != j && indexes.contains(j)){
                                 //将共享度高的组内的table关联设为最高
-                                G[i][j] = 1.5;
-                                G[j][i] = 1.5;
+                                //TODO: need to check
+//                                G[i][j] = 1.5;
+//                                G[j][i] = 1.5;
+                                G[i][j] = 0.9;
+                                G[j][i] = 0.9;
                             }
                         }
                     }
@@ -377,13 +382,14 @@ public class TableCutServiceImpl implements TableCutService {
             for(int m: map.keySet()){
                 List<Table> t = new ArrayList<>();
                 List<Integer> list = map.get(m);
+                System.out.println("第"+m+"组：" + list);
                 for(int l: list){
                     t.add(tableList1.get(l));
                 }
                 System.out.println("第"+m+"组：" + t.stream().map(a -> a.getTableName()).collect(Collectors.toList()));
                 mapResult.put(m, t);
             }
-            calculateSplitCost(mapResult);
+//            calculateSplitCost(mapResult);
         }
 
     }
