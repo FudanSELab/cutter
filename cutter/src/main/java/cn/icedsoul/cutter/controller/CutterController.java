@@ -7,11 +7,13 @@ import cn.icedsoul.cutter.repository.MethodRepository;
 import cn.icedsoul.cutter.repository.SqlRepository;
 import cn.icedsoul.cutter.repository.TableRepository;
 import cn.icedsoul.cutter.service.api.*;
+import cn.icedsoul.cutter.util.Response;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.*;
@@ -249,6 +251,14 @@ public class CutterController {
         List<Table> tableList = (List)tableRepository.findAll();
         return tableList;
     }
+
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/uploadFile")
+    @ApiOperation(value = "uploadDatFile", notes = "Upload Dat File")
+    public Response uploadDotFile(@RequestParam MultipartFile uploadDatFile){
+        return handleDataService.handleUploadFile(uploadDatFile);
+    }
+
 
     //将ShareTable转化为Table
     private List<List<Table>> shareTableToTable(List<Set<ShareTable>> shareTables){

@@ -10,10 +10,14 @@ import cn.icedsoul.cutter.relation.*;
 import cn.icedsoul.cutter.repository.*;
 import cn.icedsoul.cutter.service.api.HandleDataService;
 import cn.icedsoul.cutter.util.CONSTANT;
+import cn.icedsoul.cutter.util.Response;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.BufferedReader;
@@ -86,6 +90,29 @@ public class HandleDataServiceImpl implements HandleDataService {
         }
         buildTree();
         log.info("[Handle data finish!]");
+    }
+
+    @Override
+    public Response handleUploadFile(MultipartFile uploadDatFile) {
+        try{
+            if(uploadDatFile != null && !uploadDatFile.isEmpty()) {
+                String fileRealPath = "/app/";
+                String fileName = RandomStringUtils.randomAlphanumeric(10) + ".dat";
+                File fileFolder = new File(fileRealPath);
+                System.out.println("fileRealPath=" + fileRealPath + fileName);
+                if(!fileFolder.exists()){
+                    fileFolder.mkdirs();
+                }
+                File file = new File(fileFolder,fileName);
+                uploadDatFile.transferTo(file);
+                handleData(fileRealPath + fileName);
+                return new Response(1, "dat文件处理成功", null);
+            }
+            return new Response(-1, "选择文件为空", null);
+        }catch(Exception e){
+            e.printStackTrace();
+            return new Response(-1, "处理过程异常", null);
+        }
     }
 
     private void buildTree() {
