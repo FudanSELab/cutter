@@ -259,6 +259,13 @@ public class CutterController {
         return handleDataService.handleUploadFile(uploadDatFile);
     }
 
+    @CrossOrigin(origins = "*")
+    @PostMapping(value = "/uploadFile2")
+    @ApiOperation(value = "uploadDatFile2", notes = "Upload Dat File 2")
+    public Response uploadDotFile2(@RequestParam(value = "file" , required = true) MultipartFile uploadDatFile){
+        return handleDataService.handleUploadFile(uploadDatFile);
+    }
+
 
     //将ShareTable转化为Table
     private List<List<Table>> shareTableToTable(List<Set<ShareTable>> shareTables){

@@ -211,7 +211,7 @@ public class SplitCostServiceImpl implements SplitCostService {
                 methodToSplitIds.add(method.getId());
             } else {
                 //去掉entry method!!!!!!!
-                if( ! method.getMethodName().equals("Entry")){
+                if( cs.size() <= 0 && ! method.getMethodName().equals("Entry")){
                     noTableMethodList.add(method);
                 }
             }
@@ -254,7 +254,7 @@ public class SplitCostServiceImpl implements SplitCostService {
             }
             if(toSplit){
                 classToSplit.put(c, cs);
-            } else {
+            } else if(cs.size() <= 0){
                 noTableClassList.add(c);
             }
 
@@ -355,9 +355,6 @@ public class SplitCostServiceImpl implements SplitCostService {
         SplitDetail sp = new SplitDetail(sortedGroupBySql, sortedGroupByMethod, sortedGroupByClass);
         return sp;
     }
-
-
-
 
     @Override
     public Map<Integer, List<SplitNode>> getCodeSplitDetailTree() {
