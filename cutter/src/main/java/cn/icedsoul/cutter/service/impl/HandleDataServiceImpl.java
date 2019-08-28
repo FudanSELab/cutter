@@ -74,6 +74,7 @@ public class HandleDataServiceImpl implements HandleDataService {
 
     private List<BaseRelation> relations = new ArrayList<>();
 
+//    private int number = 0;
     @Override
     public void handleData(String fileName) {
         clearDatabase();
@@ -196,6 +197,7 @@ public class HandleDataServiceImpl implements HandleDataService {
     }
 
     private void handleSingleLine(String line){
+//        System.out.println(this.number++);
         if (line.length() <= 0) {
             log.info("This line is blank!");
             return;

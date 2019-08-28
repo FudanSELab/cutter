@@ -2415,3 +2415,17 @@
 2019-08-26 13:03:50.423+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=211, gcTime=0, gcCount=0}
 2019-08-26 13:03:50.733+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=492, gcTime=0, gcCount=0}
 2019-08-26 13:03:50.834+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=199, gcTime=0, gcCount=0}
+2019-08-26 13:07:35.858+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=245, gcTime=0, gcCount=0}
+2019-08-26 13:07:42.946+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=104, gcTime=0, gcCount=0}
+2019-08-26 13:07:59.362+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=113, gcTime=0, gcCount=0}
+2019-08-26 13:07:59.616+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=224, gcTime=0, gcCount=0}
+2019-08-26 13:08:26.406+0000 INFO [o.n.k.a.DatabaseAvailabilityGuard] Database graph.db is unavailable.
+2019-08-26 13:08:29.992+0000 INFO [o.n.g.f.GraphDatabaseFacadeFactory] Shutdown started
+2019-08-26 13:08:30.425+0000 WARN [o.n.k.i.c.VmPauseMonitorComponent] Detected VM stop-the-world pause: {pauseTime=160, gcTime=0, gcCount=0}
+2019-08-26 13:08:31.150+0000 INFO [o.n.g.f.GraphDatabaseFacadeFactory] Shutting down 'graph.db' database.
+2019-08-26 13:08:31.150+0000 INFO [o.n.g.f.GraphDatabaseFacadeFactory] Shutdown started
+2019-08-26 13:08:31.798+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Database shutdown" @ txId: 1 checkpoint started...
+2019-08-26 13:08:33.216+0000 INFO [o.n.k.i.t.l.c.CheckPointerImpl] Checkpoint triggered by "Database shutdown" @ txId: 1 checkpoint completed in 1s 276ms
+2019-08-26 13:08:33.308+0000 INFO [o.n.k.i.t.l.p.LogPruningImpl] No log version pruned, last checkpoint was made in version 0
+2019-08-26 13:08:34.086+0000 INFO [o.n.i.d.DiagnosticsManager] --- STOPPING diagnostics START ---
+2019-08-26 13:08:34.102+0000 INFO [o.n.i.d.DiagnosticsManager] --- STOPPING diagnostics END ---
