@@ -160,6 +160,8 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
             log.info(shareTable.getTable().getTableName() + " " + (shareTable.getSqlShare() * 0.2 + shareTable.getCTraceTypeShare() * 0.8  + shareTable.getScenarioShare()));
             log.info(shareTable.getTable().getTableName() + " " + shareTable.getSqlShare() + " " + shareTable.getCTraceTypeShare() + " " + shareTable.getScenarioShare());
         }
+
+        //确定共享表数量
         int number = shareTableCount(shareTables.size());
         List<Set<ShareTable>> group = new ArrayList<>();
         for(int i = 0; i < number; i++){
@@ -167,26 +169,81 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
             set.add(shareTables.get(i));
             group.add(set);
         }
-        for(int i = 0; i < number; i++){
+
+        double[][] sqlSimilar, traceSimilar, scenarioSimilar;
+
+        //计算、填写相似度矩阵
+        sqlSimilar = new double[shareTables.size()][shareTables.size()];
+        traceSimilar = new double[shareTables.size()][shareTables.size()];
+        scenarioSimilar = new double[shareTables.size()][shareTables.size()];
+
+        for(int i = 0; i < shareTables.size(); i++){
             ShareTable table1 = shareTables.get(i);
-            for(int j = i + 1; j < number; j++){
+            for(int j = i + 1; j < shareTables.size(); j++){
                 ShareTable table2 = shareTables.get(j);
-                if(similar(table1.getTable(), table2.getTable())){
-                    Set<ShareTable> set1 = new HashSet<>();
-                    Set<ShareTable> set2 = new HashSet<>();
-                    for(Set<ShareTable> set : group){
-                        if(set.contains(table1)){
-                            set1 = set;
+                TwoWayRelation sqlTwoWayRelation = weightCalculationService.calculateSqlSimilar(table1.getTable(), table2.getTable());
+                sqlSimilar[i][j] = sqlTwoWayRelation.getAToB();
+                sqlSimilar[j][i] = sqlTwoWayRelation.getBToA();
+                TwoWayRelation traceTwoWayRelation = weightCalculationService.calculateTraceSimilar(table1.getTable(), table2.getTable());
+                traceSimilar[i][j] = traceTwoWayRelation.getAToB();
+                traceSimilar[j][i] = traceTwoWayRelation.getBToA();
+                TwoWayRelation scenarioTwoWayRelation = weightCalculationService.calculateScenarioSimilar(table1.getTable(), table2.getTable());
+                scenarioSimilar[i][j] = scenarioTwoWayRelation.getAToB();
+                scenarioSimilar[j][i] = scenarioTwoWayRelation.getBToA();
+                if(i < number && j < number) {
+                    log.info(table1.getTable().getTableName() + "  " + table2.getTable().getTableName() + " " + sqlTwoWayRelation.getAToB() + " " + sqlTwoWayRelation.getBToA() + " " +
+                            traceTwoWayRelation.getAToB() + " " + traceTwoWayRelation.getBToA() + " " +
+                                    scenarioTwoWayRelation.getAToB() + " " + scenarioTwoWayRelation.getBToA());
+                    if (similar(sqlTwoWayRelation, traceTwoWayRelation, scenarioTwoWayRelation)) {
+                        Set<ShareTable> set1 = new HashSet<>();
+                        Set<ShareTable> set2 = new HashSet<>();
+                        for (Set<ShareTable> set : group) {
+                            if (set.contains(table1)) {
+                                set1 = set;
+                            }
+                            if (set.contains(table2)) {
+                                set2 = set;
+                            }
                         }
-                        if(set.contains(table2)){
-                            set2 = set;
-                        }
+                        group.remove(set1);
+                        group.remove(set2);
+                        set1.addAll(set2);
+                        group.add(set1);
                     }
-                    group.remove(set1);
-                    group.remove(set2);
-                    set1.addAll(set2);
-                    group.add(set1);
                 }
+            }
+        }
+//        for(int i = 0; i < sqlSimilar.length; i++){
+//            for(int j = 0; j < sqlSimilar.length; j++){
+//                System.out.print(sqlSimilar[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        for(int i = 0; i < traceSimilar.length; i++){
+//            for(int j = 0; j < traceSimilar.length; j++){
+//                System.out.print(traceSimilar[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        for(int i = 0; i < scenarioSimilar.length; i++){
+//            for(int j = 0; j < scenarioSimilar.length; j++){
+//                System.out.print(scenarioSimilar[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+
+        for(Set<ShareTable> set : group){
+            Set<ShareTable> relyOnShareTable = new HashSet<>();
+            for(ShareTable shareTable : set) {
+                for (int i = number; i < shareTables.size(); i++) {
+                    log.info(shareTable.getTable().getTableName() + " " + shareTables.get(i).getTable().getTableName());
+                    if(relyOn(shareTables.indexOf(shareTable), i, sqlSimilar, traceSimilar, scenarioSimilar, set, shareTables)){
+                        relyOnShareTable.add(shareTables.get(i));
+                    }
+                }
+            }
+            if(relyOnShareTable.size() > 0) {
+                set.addAll(relyOnShareTable);
             }
         }
 
@@ -196,6 +253,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
                 log.info(shareTable.getTable().getTableName());
             }
         }
+
         return group;
     }
 
@@ -207,13 +265,13 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         return (int) Math.ceil(tableCount * (-2.648790319632655 * Math.pow(10, -12) * Math.pow(tableCount, 6) + 1.2157745273003864 * Math.pow(10, -9) * Math.pow(tableCount, 5) - 2.1024376321144118 * Math.pow(10, -7) * Math.pow(tableCount, 4)+ 0.000016781858324772667 * Math.pow(tableCount, 3) - 0.0005827489400527467 * Math.pow(tableCount, 2)+ 0.003528621097963147 * tableCount+ 0.3081903336705743));
     }
 
-
-    private boolean similar(Table a, Table b){
-        TwoWayRelation sqlTwoWayRelation = weightCalculationService.calculateSqlSimilar(a, b);
-        TwoWayRelation traceTwoWayRelation = weightCalculationService.calculateTraceSimilar(a, b);
-//        TwoWayRelation scenarioTwoWayRelation = weightCalculationService.calculateScenarioSimilar(a, b);
-        log.info(a.getTableName() + " " + b.getTableName() + ": " + sqlTwoWayRelation.getAToB() + " " + sqlTwoWayRelation.getBToA() + " " +
-                traceTwoWayRelation.getAToB() + " " + traceTwoWayRelation.getBToA());
+    /**
+     * 判断a，b两表是否相似
+     * @param sqlTwoWayRelation
+     * @param traceTwoWayRelation
+     * @return
+     */
+    private boolean similar(TwoWayRelation sqlTwoWayRelation, TwoWayRelation traceTwoWayRelation, TwoWayRelation scenarioTwoWayRelation){
         boolean isSimilar = false;
 //      SQL级别相似
         if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() > 1.4){
@@ -223,11 +281,43 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
         if(traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 1.6){
             isSimilar = true;
         }
+//      Scenario级别相似
+        if(scenarioTwoWayRelation.getAToB() + scenarioTwoWayRelation.getBToA() > 1.8){
+            isSimilar = true;
+        }
 //      整体相似
-        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.8){
+        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.8 &&
+                scenarioTwoWayRelation.getBToA() + scenarioTwoWayRelation.getAToB() > 1.0){
             isSimilar = true;
         }
         return isSimilar;
+    }
+
+    /**
+     * 判断表b是否反向依赖表a，ab为表在sharetables中编号。
+     * @param a
+     * @param b
+     * @return
+     */
+    private boolean relyOn(int a, int b, double[][] sqlSimilar, double[][] traceSimilar, double[][] scenarioSimilar, Set<ShareTable> set, List<ShareTable> shareTables){
+//        System.out.println("[Notice]:" + a + " " + b);
+        return relyOnSingle(sqlSimilar[b][a], a, b, traceSimilar, scenarioSimilar, set, shareTables) ||
+                relyOnSingle(traceSimilar[b][a], a, b, sqlSimilar, scenarioSimilar, set, shareTables) ||
+                relyOnSingle(scenarioSimilar[b][a], a, b, sqlSimilar, traceSimilar, set, shareTables);
+    }
+
+    private boolean relyOnSingle(Double t, int a, int b, double[][] similarA, double[][] similarB, Set<ShareTable> set, List<ShareTable> shareTables){
+        if(t == 1){
+            double s = 0;
+            for(int i = 0; i < similarA.length; i++){
+                if(i != a && !set.contains(shareTables.get(i))) {
+                    s += similarA[i][b];
+                    s += similarB[i][b];
+                }
+            }
+            return s == 0;
+        }
+        return false;
     }
 
 
