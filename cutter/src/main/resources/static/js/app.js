@@ -1,7 +1,13 @@
-var app = angular.module('cut-app', ['ngRoute', 'ngDraggable', 'app.cut-controller', 'app.adjust-controller']);
+var app = angular.module('cut-app', ['ngRoute', 'ngDraggable', 'app.cut-controller',
+    'app.adjust-controller', 'app.upload-controller']);
 
 app.config(['$routeProvider', function($routeProvider){
     $routeProvider
+        .when('/upload', {
+            templateUrl: 'templates/upload.html',
+            controller: 'UploadCtrl',
+            cache: true
+        })
         .when('/cut', {
             templateUrl: 'templates/cutter.html',
             controller: 'CutCtrl',
@@ -12,7 +18,7 @@ app.config(['$routeProvider', function($routeProvider){
             controller: 'AdjustCtrl',
             cache: true
         })
-        .otherwise({redirectTo:'/cut'});
+        .otherwise({redirectTo:'/upload'});
 }
 
 ]);
@@ -23511,6 +23517,28 @@ app.factory('CostService', function ($http, $q) {
             }
         });
 
+        return promise;
+    };
+    return service;
+});
+
+app.factory('UploadFileService', function ($http, $q) {
+    var service = {};
+    //获取并返回数据
+    service.upload = function (form) {
+        var deferred = $q.defer();
+        var promise = deferred.promise;
+        $http({
+            method: "post",
+            url: "/uploadFile2",
+            data:form,
+            withCredentials: true,
+            headers: {'Content-Type':undefined},
+            transformRequest: angular.identity
+        }).success(function () {
+            alert("Upload success!");
+            deferred.resolve("success");
+        });
         return promise;
     };
     return service;
