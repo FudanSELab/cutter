@@ -213,21 +213,31 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
                 }
             }
         }
-//        for(int i = 0; i < sqlSimilar.length; i++){
-//            for(int j = 0; j < sqlSimilar.length; j++){
-//                System.out.print(sqlSimilar[i][j] + " ");
+
+        for (Set<ShareTable> set : group){
+            log.info("Group:");
+            for(ShareTable shareTable : set){
+                log.info(shareTable.getTable().getTableName());
+            }
+        }
+
+//        for(int i = 0; i < sqlSimilar.length ; i++){
+//            for(int j = 0; j < sqlSimilar.length ; j++){
+//                System.out.print(String.format("%.2f",sqlSimilar[i][j]).toString() + " ");
 //            }
 //            System.out.println();
 //        }
-//        for(int i = 0; i < traceSimilar.length; i++){
-//            for(int j = 0; j < traceSimilar.length; j++){
-//                System.out.print(traceSimilar[i][j] + " ");
+//        System.out.println();
+//        for(int i = 0; i < sqlSimilar.length ; i++){
+//            for(int j = 0; j < sqlSimilar.length ; j++){
+//                System.out.print(String.format("%.2f",traceSimilar[i][j]).toString() + " ");
 //            }
 //            System.out.println();
 //        }
-//        for(int i = 0; i < scenarioSimilar.length; i++){
-//            for(int j = 0; j < scenarioSimilar.length; j++){
-//                System.out.print(scenarioSimilar[i][j] + " ");
+//        System.out.println();
+//        for(int i = 0; i < sqlSimilar.length ; i++){
+//            for(int j = 0; j < sqlSimilar.length ; j++){
+//                System.out.print(String.format("%.2f",scenarioSimilar[i][j]).toString() + " ");
 //            }
 //            System.out.println();
 //        }
@@ -238,6 +248,7 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
                 for (int i = number; i < shareTables.size(); i++) {
                     log.info(shareTable.getTable().getTableName() + " " + shareTables.get(i).getTable().getTableName());
                     if(relyOn(shareTables.indexOf(shareTable), i, sqlSimilar, traceSimilar, scenarioSimilar, set, shareTables)){
+                        log.info("adddddddddddddd");
                         relyOnShareTable.add(shareTables.get(i));
                     }
                 }
@@ -282,12 +293,12 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
             isSimilar = true;
         }
 //      Scenario级别相似
-        if(scenarioTwoWayRelation.getAToB() + scenarioTwoWayRelation.getBToA() > 1.8){
+        if(scenarioTwoWayRelation.getAToB() + scenarioTwoWayRelation.getBToA() >= 2.0){
             isSimilar = true;
         }
 //      整体相似
-        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.8 &&
-                scenarioTwoWayRelation.getBToA() + scenarioTwoWayRelation.getAToB() > 1.0){
+        if(sqlTwoWayRelation.getAToB() + sqlTwoWayRelation.getBToA() + traceTwoWayRelation.getAToB() + traceTwoWayRelation.getBToA() > 2.8
+                && scenarioTwoWayRelation.getBToA() + scenarioTwoWayRelation.getAToB() > 1.5){
             isSimilar = true;
         }
         return isSimilar;
@@ -301,24 +312,35 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
      */
     private boolean relyOn(int a, int b, double[][] sqlSimilar, double[][] traceSimilar, double[][] scenarioSimilar, Set<ShareTable> set, List<ShareTable> shareTables){
 //        System.out.println("[Notice]:" + a + " " + b);
-        return relyOnSingle(sqlSimilar[b][a], a, b, traceSimilar, scenarioSimilar, set, shareTables) ||
-                relyOnSingle(traceSimilar[b][a], a, b, sqlSimilar, scenarioSimilar, set, shareTables) ||
-                relyOnSingle(scenarioSimilar[b][a], a, b, sqlSimilar, traceSimilar, set, shareTables);
-    }
-
-    private boolean relyOnSingle(Double t, int a, int b, double[][] similarA, double[][] similarB, Set<ShareTable> set, List<ShareTable> shareTables){
-        if(t == 1){
+//        return relyOnSingle(sqlSimilar[b][a], a, b, traceSimilar, scenarioSimilar, set, shareTables) ||
+//                relyOnSingle(traceSimilar[b][a], a, b, sqlSimilar, scenarioSimilar, set, shareTables) ||
+//                relyOnSingle(scenarioSimilar[b][a], a, b, sqlSimilar, traceSimilar, set, shareTables);
+        if(sqlSimilar[b][a] > 0 || traceSimilar[b][a] > 0 || scenarioSimilar[b][a] > 0){
             double s = 0;
-            for(int i = 0; i < similarA.length; i++){
-                if(i != a && !set.contains(shareTables.get(i))) {
-                    s += similarA[i][b];
-                    s += similarB[i][b];
+            for(int i = 0; i < sqlSimilar.length; i++){
+                if(i != a && !set.contains(shareTables.get(i))){
+                    s += sqlSimilar[b][i] + traceSimilar[b][i] + scenarioSimilar[b][i];
                 }
             }
+
             return s == 0;
         }
         return false;
     }
+
+//    private boolean relyOnSingle(Double t, int a, int b, double[][] similarA, double[][] similarB, Set<ShareTable> set, List<ShareTable> shareTables){
+//        if(t == 1){
+//            double s = 0;
+//            for(int i = 0; i < similarA.length; i++){
+//                if(i != a && !set.contains(shareTables.get(i))) {
+//                    s += similarA[b][i];
+//                    s += similarB[b][i];
+//                }
+//            }
+//            return s == 0;
+//        }
+//        return false;
+//    }
 
 
 }
