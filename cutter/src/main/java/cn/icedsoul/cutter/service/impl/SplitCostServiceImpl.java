@@ -36,6 +36,8 @@ public class SplitCostServiceImpl implements SplitCostService {
     Map<Sql, Set<Integer>> sqlToSplit ;
     Map<Method, Set<Integer>> methodToSplit ;
     Map<Class, Set<Integer>> classToSplit ;
+    //需要拆分的methodId->对应的微服务的编号集合
+    Map<Long, Set<Integer>> methodIdToSplitServices ;
 
     Map<String, Set<Integer>> sqlToSplitResult ;
     Map<String, Set<Integer>> methodToSplitResult ;
@@ -75,6 +77,8 @@ public class SplitCostServiceImpl implements SplitCostService {
         sqlToSplitIds = new ArrayList<>();
         methodToSplitIds = new ArrayList<>();
 
+        methodIdToSplitServices = new HashMap<>();
+
         initTableGroupMap(tgs);
 
         Iterator<Sql> sqlIterator = sqlRepository.findAll().iterator();
@@ -101,6 +105,7 @@ public class SplitCostServiceImpl implements SplitCostService {
                     if(sqlToSplitIds.contains(id)){
                         Set<Integer> cs = getClusterSet(method.getTables());
                         methodToSplit.put(method, cs);
+                        methodIdToSplitServices.put(method.getId(), cs);
                         methodToSplitIds.add(method.getId());
                         break;
                     }
@@ -120,12 +125,17 @@ public class SplitCostServiceImpl implements SplitCostService {
             Class c = classIterator.next();
             List<Long> methodIds = methodRepository.getMethodsByClassId(c.getId());
             if(methodIds != null && methodIds.size() > 0){
+                Set<Integer> belongServices = new HashSet<>();
                 for(long id:methodIds){
-                    if(methodToSplitIds.contains(id)){
-                        Set<Integer> cs = getClusterSet(c.getTables());
-                        classToSplit.put(c, cs);
-                        break;
-                    }
+                    belongServices.addAll(methodIdToSplitServices.getOrDefault(id, new HashSet<>()));
+//                    if(methodToSplitIds.contains(id)){
+//                        Set<Integer> cs = getClusterSet(c.getTables());
+//                        classToSplit.put(c, cs);
+//                        break;
+//                    }
+                }
+                if(belongServices.size() > 1){
+                    classToSplit.put(c, belongServices);
                 }
             }
 //            Set<Long> tableIdList = c.getTables();
@@ -166,6 +176,8 @@ public class SplitCostServiceImpl implements SplitCostService {
 
         noTableClassList = new HashSet<>();
         noTableMethodList = new HashSet<>();
+
+        methodIdToSplitServices = new HashMap<>();
 
         initTableGroupMap(tgs);
 
@@ -209,6 +221,7 @@ public class SplitCostServiceImpl implements SplitCostService {
             if(toSplit){
                 methodToSplit.put(method, cs);
                 methodToSplitIds.add(method.getId());
+                methodIdToSplitServices.put(method.getId(), cs);
             } else {
                 //去掉entry method!!!!!!!
                 if( cs.size() <= 0 && ! method.getMethodName().equals("Entry")){
@@ -240,11 +253,17 @@ public class SplitCostServiceImpl implements SplitCostService {
             List<Long> methodIds = methodRepository.getMethodsByClassId(c.getId());
             boolean toSplit = false;
             if(methodIds != null && methodIds.size() > 0){
+                Set<Integer> belongServices = new HashSet<>();
                 for(long id:methodIds){
-                    if(methodToSplitIds.contains(id)){
+                    belongServices.addAll(methodIdToSplitServices.getOrDefault(id, new HashSet<>()));
+                    if(belongServices.size() > 1){
                         toSplit = true;
                         break;
                     }
+//                    if(methodToSplitIds.contains(id)){
+//                        toSplit = true;
+//                        break;
+//                    }
                 }
             }
             Set<Integer> cs = getClusterSet(c.getTables());
