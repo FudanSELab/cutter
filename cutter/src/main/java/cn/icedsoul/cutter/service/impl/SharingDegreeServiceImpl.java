@@ -163,11 +163,14 @@ public class SharingDegreeServiceImpl implements SharingDegreeService {
 
         //确定共享表数量
         int number = shareTableCount(shareTables.size());
+
         List<Set<ShareTable>> group = new ArrayList<>();
         for(int i = 0; i < number; i++){
-            Set<ShareTable> set = new HashSet<>();
-            set.add(shareTables.get(i));
-            group.add(set);
+            if(shareTables.get(number).compareTo(shareTables.get(i)) == 1) {
+                Set<ShareTable> set = new HashSet<>();
+                set.add(shareTables.get(i));
+                group.add(set);
+            }
         }
 
         double[][] sqlSimilar, traceSimilar, scenarioSimilar;
